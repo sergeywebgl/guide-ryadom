@@ -18,6 +18,8 @@ Domain has no Flutter imports. Provider seams: AiProvider, PoiRepository, Locati
 
 ## Manual Android acceptance still needed
 
+Remote build confirmed: [GitHub Actions run 38863116504](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38863116504) succeeded for commit `4ac41f47a61de7f50593b83e4f60f1fc2672ce49`: formatting, analysis, all tests, debug APK build and artifact upload. Download `guide-ryadom-m0-debug` from that run and extract `app-debug.apk`. This proves compilation, not behavior on a physical device.
+
 1. Build/install the debug APK on each phone; record Android version and device model.
 2. Enable airplane mode before cold launch. Complete all three stops without credentials; no permission requests should appear.
 3. Tap More and Surprise, verify distinct text and disabled exhausted actions. Rapidly double-tap Next; verify one transition. Check Back, Skip, finish, and explicit restart.

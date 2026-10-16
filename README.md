@@ -27,6 +27,8 @@ flutter build apk --debug
 
 APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m0-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
 
+**Ready to try:** [successful M0 build and APK artifact](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38863116504), code commit `4ac41f4`. Download the `guide-ryadom-m0-debug` artifact, unzip it and install `app-debug.apk` on Android. Enable airplane mode and walk through the demo; device testing is still outstanding.
+
 The temporary package ID is `com.example.guide_ryadom`. For release, update `applicationId` and `namespace` in `android/app/build.gradle.kts`, and the package declaration/path of `MainActivity.kt`; configure release signing separately. Do not commit signing keys.
 
 ### What works now
