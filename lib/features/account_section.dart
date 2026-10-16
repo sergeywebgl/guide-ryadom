@@ -30,7 +30,7 @@ class _AccountSectionState extends State<AccountSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Аккаунт ChatGPT · M1',
+                'Аккаунт ChatGPT · M1.1',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -99,6 +99,17 @@ class _AccountSectionState extends State<AccountSection> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Semantics(liveRegion: true, child: Text(c.message!)),
                 ),
+              if (c.failure != null) ...[
+                if (c.failure!.stageLabel != null)
+                  Text('Этап: ${c.failure!.stageLabel}'),
+                SelectableText('Диагностика: ${c.failure!.diagnostic}'),
+                TextButton(
+                  onPressed: () => Clipboard.setData(
+                    ClipboardData(text: c.failure!.diagnostic),
+                  ),
+                  child: const Text('Копировать код ошибки'),
+                ),
+              ],
               if (c.account != null && c.inferenceAllowed) ...[
                 const Divider(height: 28),
                 Text(

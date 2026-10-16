@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guide_ryadom/domain/auth.dart';
@@ -102,6 +103,8 @@ class Harness {
   Map<String, dynamic> tokenOverrides = {};
   String scope = requestedScopes;
   int exchangeStatus = 200;
+  Object? tokenFailure;
+  Object? jwksFailure;
   int revokeStatus = 200;
   final requests = <http.Request>[];
   int refreshes = 0;
@@ -130,6 +133,7 @@ class Harness {
     if (request.url.path.endsWith('openid-configuration')) {
       body = metadata;
     } else if (request.url.path.endsWith('jwks.json')) {
+      if (jwksFailure != null) throw jwksFailure!;
       final raw = key.toJson();
       body = {
         'keys': [
@@ -143,6 +147,7 @@ class Harness {
         ],
       };
     } else if (request.url.path.endsWith('/token')) {
+      if (tokenFailure != null) throw tokenFailure!;
       final refresh = request.bodyFields['grant_type'] == 'refresh_token';
       if (refresh) refreshes++;
       status = exchangeStatus;
@@ -186,6 +191,66 @@ void main() {
     final generated = JsonWebKey.generate('RS256', keyBitLength: 2048);
     key = JsonWebKey.fromJson({...generated.toJson(), 'kid': 'test-key'});
   });
+
+  test(
+    'internal exchange failure is not reported as a network outage',
+    () async {
+      final h = Harness(key)..tokenFailure = StateError('SECRET mock-code');
+      addTearDown(h.service.dispose);
+      await expectLater(h.service.signIn(), fails('internal'));
+      expect(h.service.account, isNull);
+    },
+  );
+
+  for (final (error, code, cause) in <(Object, String, AuthCause)>[
+    (
+      const SocketException('SECRET socket address'),
+      'network',
+      AuthCause.socket,
+    ),
+    (const HandshakeException('SECRET certificate'), 'tls', AuthCause.tls),
+    (http.ClientException('SECRET url'), 'network', AuthCause.httpClient),
+    (StateError('SECRET state'), 'internal', AuthCause.state),
+    (TimeoutException('SECRET timeout'), 'timeout', AuthCause.timeout),
+  ]) {
+    test(
+      'exchange diagnostic distinguishes $cause without exposing secrets',
+      () async {
+        final h = Harness(key)..tokenFailure = error;
+        addTearDown(h.service.dispose);
+        try {
+          await h.service.signIn();
+          fail('Expected failure');
+        } on AuthFailure catch (failure) {
+          expect(failure.stage, AuthStage.exchange);
+          expect(failure.code, code);
+          expect(failure.cause, cause);
+          expect(failure.diagnostic, contains('exchange'));
+          expect(
+            '${failure.message} ${failure.diagnostic} $failure',
+            isNot(contains('SECRET')),
+          );
+        }
+        expect(h.service.account, isNull);
+      },
+    );
+  }
+
+  test(
+    'JWKS network failure retains its stage instead of becoming identity error',
+    () async {
+      final h = Harness(key)..jwksFailure = const SocketException('SECRET');
+      addTearDown(h.service.dispose);
+      await expectLater(
+        h.service.signIn(),
+        throwsA(
+          isA<AuthFailure>()
+              .having((e) => e.stage, 'stage', AuthStage.jwks)
+              .having((e) => e.cause, 'cause', AuthCause.socket),
+        ),
+      );
+    },
+  );
 
   for (final invalid in <Map<String, dynamic>>[
     {'access_token': ''},

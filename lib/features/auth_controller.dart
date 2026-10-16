@@ -12,6 +12,7 @@ class AuthController extends ChangeNotifier {
   bool initialized = false;
   bool completed = false;
   String? message;
+  AuthFailure? failure;
   String text = '';
   List<AvailableModel> models = [];
   String? selectedModel;
@@ -23,9 +24,8 @@ class AuthController extends ChangeNotifier {
   }
 
   void _error(Object error) {
-    message = error is AuthFailure
-        ? error.message
-        : const AuthFailure('network').message;
+    failure = error is AuthFailure ? error : const AuthFailure('internal');
+    message = failure!.message;
     state = account == null ? AccountState.error : AccountState.connected;
   }
 
@@ -52,6 +52,7 @@ class AuthController extends ChangeNotifier {
     completed = false;
     text = '';
     message = null;
+    failure = null;
     models = [];
     selectedModel = null;
     state = AccountState.connecting;
@@ -80,6 +81,7 @@ class AuthController extends ChangeNotifier {
   Future<void> disconnect() async {
     if (busy) return;
     busy = true;
+    failure = null;
     completed = false;
     text = '';
     models = [];
@@ -101,6 +103,7 @@ class AuthController extends ChangeNotifier {
     if (busy) return;
     busy = true;
     message = null;
+    failure = null;
     _notify();
     try {
       models = await provider.discoverModels();
@@ -127,6 +130,7 @@ class AuthController extends ChangeNotifier {
     completed = false;
     text = '';
     message = null;
+    failure = null;
     _notify();
     try {
       text = await provider.probe(model, (partial) {

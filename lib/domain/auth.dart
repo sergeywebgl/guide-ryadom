@@ -33,10 +33,64 @@ abstract interface class AuthProvider {
 }
 
 /// Safe, closed vocabulary. Never include provider bodies, URLs or token values.
+enum AuthStage {
+  restore,
+  host,
+  metadata,
+  listener,
+  browser,
+  callback,
+  exchange,
+  identity,
+  jwks,
+  tokenSet,
+  storage,
+  refresh,
+  models,
+  response,
+  cleanup,
+}
+
+enum AuthCause {
+  socket,
+  tls,
+  httpClient,
+  timeout,
+  format,
+  state,
+  type,
+  platform,
+  unknown,
+}
+
 class AuthFailure implements Exception {
-  const AuthFailure(this.code, {this.status});
+  const AuthFailure(this.code, {this.status, this.stage, this.cause});
   final String code;
   final int? status;
+  final AuthStage? stage;
+  final AuthCause? cause;
+  AuthFailure atStage(AuthStage value) =>
+      AuthFailure(code, status: status, stage: stage ?? value, cause: cause);
+  String get diagnostic =>
+      'M1.1 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}';
+  String? get stageLabel => switch (stage) {
+    AuthStage.restore => 'Чтение сохранённой сессии',
+    AuthStage.host => 'Подготовка установки',
+    AuthStage.metadata => 'Загрузка настроек OpenAI',
+    AuthStage.listener => 'Запуск локального callback',
+    AuthStage.browser => 'Открытие браузера',
+    AuthStage.callback => 'Получение и проверка ответа браузера',
+    AuthStage.exchange => 'Обмен кода на токены',
+    AuthStage.identity => 'Проверка аккаунта и подписи',
+    AuthStage.jwks => 'Загрузка ключей проверки подписи',
+    AuthStage.tokenSet => 'Проверка набора токенов',
+    AuthStage.storage => 'Сохранение защищённой сессии',
+    AuthStage.refresh => 'Обновление сессии',
+    AuthStage.models => 'Загрузка доступных моделей',
+    AuthStage.response => 'Получение ответа GPT',
+    AuthStage.cleanup => 'Закрытие локального callback',
+    null => null,
+  };
   String get message => switch (code) {
     'cancelled' => 'Вход или запрос отменён.',
     'denied' => 'Вход или разрешение отклонено в браузере.',
@@ -58,6 +112,9 @@ class AuthFailure implements Exception {
     'loopback' => 'Не удалось запустить официальный локальный callback.',
     'busy' => 'Дождитесь завершения текущей операции.',
     'protocol' => 'Ответ сервиса не соответствует официальному контракту.',
+    'internal' =>
+      'Внутренняя ошибка приложения. Передайте код диагностики разработчику.',
+    'tls' => 'Не удалось установить защищённое соединение с OpenAI.',
     _ =>
       'Сетевая ошибка${status == null ? '' : ' (HTTP $status)'}. Повторите позже.',
   };

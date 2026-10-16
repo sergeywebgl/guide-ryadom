@@ -36,7 +36,7 @@ class FakeAuth implements AuthProvider {
   @override
   Future<String> probe(String model, void Function(String) onPartial) async {
     onPartial('Часть ответа');
-    if (failProbe) throw const AuthFailure('stream');
+    if (failProbe) throw const AuthFailure('stream', stage: AuthStage.response);
     return 'Полный ответ';
   }
 
@@ -75,12 +75,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Ответ завершён · response.completed'), findsNothing);
     expect(find.text('Частичный ответ — успех не подтверждён'), findsOneWidget);
+    expect(find.text('Этап: Получение ответа GPT'), findsOneWidget);
+    expect(find.text('Диагностика: M1.1 / response / stream'), findsOneWidget);
+    expect(find.text('Копировать код ошибки'), findsOneWidget);
     await tester.ensureVisible(find.text('Отключить аккаунт'));
     await tester.tap(find.text('Отключить аккаунт'));
     await tester.pumpAndSettle();
     expect(find.text('Не подключён'), findsOneWidget);
     expect(find.text('Подключить ChatGPT'), findsOneWidget);
     expect(find.text('Часть ответа'), findsNothing);
+    expect(find.text('Копировать код ошибки'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

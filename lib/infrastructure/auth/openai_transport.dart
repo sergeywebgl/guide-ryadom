@@ -6,6 +6,7 @@ import 'package:jose/jose.dart';
 
 import '../../domain/auth.dart';
 import 'oauth_contract.dart';
+import 'auth_errors.dart';
 
 const diagnosticPrompt =
     'Расскажи один интересный и общеизвестный факт о Питерборском соборе в двух предложениях.';
@@ -22,6 +23,21 @@ class OpenAiTransport {
   }
 
   Future<Map<String, dynamic>> jsonRequest(
+    String method,
+    Uri uri, {
+    Map<String, String>? form,
+    String? token,
+    AuthStage? stage,
+  }) async {
+    try {
+      return await _jsonRequest(method, uri, form: form, token: token);
+    } catch (error) {
+      if (stage == null) rethrow;
+      throw safeAuthFailure(error, stage);
+    }
+  }
+
+  Future<Map<String, dynamic>> _jsonRequest(
     String method,
     Uri uri, {
     Map<String, String>? form,
@@ -60,6 +76,7 @@ class OpenAiTransport {
     final data = await jsonRequest(
       'GET',
       Uri.parse('$issuer/.well-known/openid-configuration'),
+      stage: AuthStage.metadata,
     );
     if (data['issuer'] != issuer ||
         data['authorization_endpoint'] != authorizeEndpoint ||
@@ -108,7 +125,7 @@ class OpenAiTransport {
         throw const AuthFailure('identity');
       }
       final jwksUri = trustedAuthUri(metadataValue['jwks_uri']);
-      _jwks ??= await jsonRequest('GET', jwksUri);
+      _jwks ??= await jsonRequest('GET', jwksUri, stage: AuthStage.jwks);
       List<dynamic> matching() => (_jwks!['keys'] as List)
           .where(
             (dynamic k) =>
@@ -120,7 +137,7 @@ class OpenAiTransport {
           .toList();
       var keys = matching();
       if (keys.isEmpty) {
-        _jwks = await jsonRequest('GET', jwksUri);
+        _jwks = await jsonRequest('GET', jwksUri, stage: AuthStage.jwks);
         keys = matching();
       }
       if (keys.length != 1) throw const AuthFailure('identity');

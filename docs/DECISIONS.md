@@ -1,5 +1,9 @@
 # Engineering decisions & open questions
 
+## M1.1 diagnostic follow-up
+
+Owner confirmed consent and receipt of the loopback return page, then supplied a screenshot of a generic network error without HTTP status. Root cause remains unknown. An injected exchange StateError reproduced a separate reporting defect: all unexpected exceptions were classified as network errors. Add safe stage/cause enum codes and a copy action, preserve JWKS transport errors, and distinguish internal failures from socket/TLS/HTTP failures. No raw exceptions, credentials or callback URLs in diagnostics; no speculative OAuth workaround. Regression tests cover classification/redaction and UI display. Next evidence needed is the code from an actual device retry; do not call this a successful authentication fix.
+
 ## M1 implementation record — 16 October 2026
 
 - Owner confirmed the M0 real-Android offline smoke test and explicitly authorized M1. No further device coverage is inferred.

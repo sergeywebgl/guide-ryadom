@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../domain/auth.dart';
 import 'oauth_contract.dart';
 import 'openai_transport.dart';
+import 'auth_errors.dart';
 
 class _Session {
   _Session({
@@ -74,6 +75,7 @@ class ChatGptAuthService implements AuthProvider {
   int _epoch = 0;
   bool _disposed = false;
   List<AvailableModel> _models = [];
+  AuthStage _stage = AuthStage.restore;
   @override
   AccountInfo? get account => _session?.account;
   @override
@@ -99,24 +101,28 @@ class ChatGptAuthService implements AuthProvider {
     final epoch = ++_epoch;
     final client = clientFactory();
     _client = client;
+    var failed = false;
     try {
       return await action(OpenAiTransport(client), epoch);
-    } on AuthFailure {
-      rethrow;
-    } on TimeoutException {
-      throw AuthFailure(epoch != _epoch ? 'cancelled' : 'timeout');
-    } catch (_) {
-      throw AuthFailure(epoch != _epoch ? 'cancelled' : 'network');
+    } catch (error) {
+      failed = true;
+      if (epoch != _epoch) throw AuthFailure('cancelled', stage: _stage);
+      throw safeAuthFailure(error, _stage);
     } finally {
       _loginTimer?.cancel();
       _loginTimer = null;
-      client.close();
-      await _receiver?.close();
-      _receiver = null;
-      _client = null;
-      _cancelSignal = null;
-      _work = null;
-      done.complete();
+      try {
+        client.close();
+        await _receiver?.close();
+      } catch (error) {
+        if (!failed) throw safeAuthFailure(error, AuthStage.cleanup);
+      } finally {
+        _receiver = null;
+        _client = null;
+        _cancelSignal = null;
+        _work = null;
+        done.complete();
+      }
     }
   }
 
@@ -135,6 +141,7 @@ class ChatGptAuthService implements AuthProvider {
   });
 
   Future<void> _save() async {
+    _stage = AuthStage.storage;
     try {
       await vault.write(_snapshot());
     } catch (_) {
@@ -144,6 +151,7 @@ class ChatGptAuthService implements AuthProvider {
 
   @override
   Future<void> restore() => _run((transport, epoch) async {
+    _stage = AuthStage.restore;
     try {
       _hostId = await vault.hostId();
       final raw = await vault.read();
@@ -179,16 +187,19 @@ class ChatGptAuthService implements AuthProvider {
 
   @override
   Future<void> signIn({String? clientId}) => _run((transport, epoch) async {
+    _stage = AuthStage.host;
     final previous = _session;
     final registration = clientId == null ? null : _registrations[clientId];
     if (clientId != null && registration == null) {
       throw const AuthFailure('client');
     }
     _hostId ??= await vault.hostId();
+    _stage = AuthStage.metadata;
     await transport.metadata();
     _check(epoch);
     final receiver = receiverFactory();
     _receiver = receiver;
+    _stage = AuthStage.listener;
     final redirect = await receiver.start();
     _check(epoch);
     final attempt = OAuthAttempt(
@@ -215,12 +226,16 @@ class ChatGptAuthService implements AuthProvider {
     ]);
     // Guard against an early rejected callback while the platform opens the browser.
     unawaited(callback.then<void>((_) {}, onError: (Object _) {}));
+    _stage = AuthStage.browser;
     await browser.open(attempt.authorizationUri);
+    _stage = AuthStage.callback;
     final result = attempt.validateCallback(await callback);
     _loginTimer?.cancel();
+    _stage = AuthStage.cleanup;
     await receiver.close();
     _check(epoch);
     Map<String, dynamic> tokens;
+    _stage = AuthStage.exchange;
     try {
       tokens = await transport.jsonRequest(
         'POST',
@@ -241,6 +256,7 @@ class ChatGptAuthService implements AuthProvider {
     }
     _check(epoch);
     final idToken = tokens['id_token'];
+    _stage = AuthStage.identity;
     if (idToken is! String) throw const AuthFailure('identity');
     final identity = await transport.verifyIdentity(
       idToken,
@@ -249,6 +265,7 @@ class ChatGptAuthService implements AuthProvider {
       expectedSubject: registration?.subject,
       now: now(),
     );
+    _stage = AuthStage.tokenSet;
     final session = _readTokens(tokens, identity, idToken);
     _check(epoch);
     final oldRegistration = _registrations[identity.clientId];
@@ -331,6 +348,7 @@ class ChatGptAuthService implements AuthProvider {
     }
     _session = null;
     _check(epoch);
+    _stage = AuthStage.refresh;
     try {
       // _run is the single-operation mutex; refreshes cannot race or share a rotating token.
       final body = await transport.jsonRequest(
@@ -443,7 +461,9 @@ class ChatGptAuthService implements AuthProvider {
   @override
   Future<List<AvailableModel>> discoverModels() =>
       _run((transport, epoch) async {
+        _stage = AuthStage.models;
         final token = await _access(transport, epoch);
+        _stage = AuthStage.models;
         final models = await transport.models(token);
         _check(epoch);
         return _models = models;
@@ -456,6 +476,7 @@ class ChatGptAuthService implements AuthProvider {
   ) async {
     if (!_models.any((m) => m.slug == model)) throw const AuthFailure('models');
     final token = await _access(transport, epoch);
+    _stage = AuthStage.response;
     final result = await transport.probe(token, model, (text) {
       if (epoch == _epoch && !_disposed) onPartial(text);
     });

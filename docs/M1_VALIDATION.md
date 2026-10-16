@@ -2,6 +2,16 @@
 
 ## Status and feasibility
 
+### M1.1 diagnostic follow-up (1.1.1+3)
+
+Owner observed successful browser consent and the loopback page “Ответ получен. Вернитесь в приложение…”, followed by the app's “Сетевая ошибка. Повторите позже.” without HTTP status. This confirms browser delivery to the listener on that attempt, **not** successful callback parameter validation, token exchange, storage or inference.
+
+A regression test reproduced a diagnostic defect: an internal StateError during exchange was mislabeled as a network outage. M1.1 fixes that classification and adds safe enum-only operation-stage/cause codes, visible in Settings with “Копировать код ошибки”. Socket, TLS, HTTP client, timeout and internal failures are distinguished; JWKS download failures retain their network stage instead of appearing as invalid identity. No exception messages, stack traces, URL/query values, tokens, email or server bodies enter these codes. Cleanup also releases the operation lock if closing a resource fails.
+
+**The owner's underlying sign-in failure is not yet diagnosed or fixed.** Synthetic failures verify the diagnostic mechanism, not the cause on the phone. Retry with the M1.1 APK, confirm the account heading says M1.1, then copy the error code if login fails. Examples such as `M1.1 / exchange / network / socket` are illustrative, not observed phone results. No OAuth checks or TLS verification were weakened, no code exchange is automatically retried and no alternate endpoint was added.
+
+Local checks: formatting, analysis and 58 tests pass. The failing diagnostic regression was observed before the fix and passes afterward. M1.1 CI/APK evidence is recorded after the build below. Physical login and inference remain pending.
+
 M0 was installed and smoke-tested successfully on a real Android phone **according to the owner**. No additional M0 device tests are claimed.
 
 M1 code implements the documented flow. Android device authorization, callback delivery, secure-storage behavior and a real subscription-funded completed response are **pending owner testing on both phones**. Do not mark M1 technically complete until those checks pass.
