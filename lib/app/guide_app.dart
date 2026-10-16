@@ -44,6 +44,13 @@ class _GuideHome extends StatefulWidget {
 class _GuideHomeState extends State<_GuideHome> {
   int tab = 0;
   TourController get c => widget.controller;
+  void _explain(VoidCallback action) {
+    action();
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(c.notice!)));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -205,7 +212,7 @@ class _GuideHomeState extends State<_GuideHome> {
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: c.explainSpeech,
+                  onPressed: () => _explain(c.explainSpeech),
                   icon: const Icon(Icons.volume_off_outlined),
                   label: const Text('Слушать · скоро'),
                 ),
@@ -231,7 +238,7 @@ class _GuideHomeState extends State<_GuideHome> {
               label: Text(e.hasSurprise ? 'Удиви меня' : 'Факт прочитан'),
             ),
             OutlinedButton.icon(
-              onPressed: c.explainCamera,
+              onPressed: () => _explain(c.explainCamera),
               icon: const Icon(Icons.photo_camera_outlined),
               label: const Text('Что это?'),
             ),
