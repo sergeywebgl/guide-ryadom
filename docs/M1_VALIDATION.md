@@ -4,6 +4,8 @@
 
 ### M1.3 foreground exchange (1.1.3+5)
 
+Build evidence: [successful run 38904887835](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38904887835), code commit `94d66e4e692a35bdf27f4d1ffdaec5303df72414`. Formatting, analysis, 65 tests and Android debug build passed. Artifact: `guide-ryadom-m1-debug`. Physical retry pending.
+
 Owner reports identical `M1.2 / exchange / network / socket / os=7` on home Wi-Fi and mobile data, with no VPN or filtering. The home-network hypothesis is not supported, and replacing the HTTP pool did not resolve the observed failure. Numeric Android resolver code 7 is associated with EAI_NODATA, but the diagnostic does not prove why name lookup failed.
 
 Inspection found that callback arrival immediately triggered token exchange while the system browser could still own the foreground. M1.3 waits for Flutter's `resumed` lifecycle state after callback validation and listener shutdown, before creating the fresh exchange client or sending the code. Return from the browser page to the app within one minute; waiting is cancellable and times out safely. The code is never automatically replayed. No foreground service, battery-exemption request, DNS override, hardcoded IP or certificate bypass was added.
