@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
 
 import '../../domain/auth.dart';
+import '../../domain/probe_trace.dart';
 import 'oauth_contract.dart';
 import 'auth_errors.dart';
 
@@ -212,8 +213,12 @@ class OpenAiTransport {
   Future<String> probe(
     String token,
     String model,
-    void Function(String) onPartial,
-  ) async {
+    void Function(String) onPartial, {
+    ProbeTrace? trace,
+  }) async {
+    trace?.note(
+      'request_start model=${RegExp(r"^[a-zA-Z0-9._-]{1,80}$").hasMatch(model) ? model : "omitted"}',
+    );
     final request = http.Request('POST', Uri.parse('$resource/responses'))
       ..headers.addAll({
         'Authorization': 'Bearer $token',
@@ -229,6 +234,9 @@ class OpenAiTransport {
         'stream': true,
       });
     final response = await send(request);
+    trace?.note(
+      'headers_received HTTP=${response.statusCode} content_length=${response.contentLength} header_count=${response.headers.length} redirect=${response.isRedirect}',
+    );
     if (response.statusCode != 200) {
       // Status is safe to expose; never print arbitrary error bodies.
       await response.stream.listen((_) {}).cancel();
@@ -240,6 +248,9 @@ class OpenAiTransport {
         .first
         .trim()
         .toLowerCase();
+    trace?.note(
+      'media=${ProbeTrace.label(mediaType.isEmpty ? null : mediaType, {'text/event-stream', 'application/json', 'text/html', 'text/plain', 'application/octet-stream'})} content_type_present=${response.headers.containsKey('content-type')}',
+    );
     if (mediaType.isNotEmpty && mediaType != 'text/event-stream') {
       // Release the rejected stream. Never expose arbitrary header/body values.
       await response.stream.listen((_) {}).cancel();
@@ -263,9 +274,11 @@ class OpenAiTransport {
       return await parseResponseStream(
         response.stream,
         onPartial,
+        trace: trace,
       ).timeout(const Duration(seconds: 90));
     } catch (error) {
       final failure = safeAuthFailure(error, AuthStage.response);
+      trace?.note('transport_failure ${failure.diagnostic}');
       throw AuthFailure(
         failure.code,
         status: response.statusCode,
@@ -302,8 +315,14 @@ AuthFailure httpFailure(int status, [Map<String, dynamic>? body]) {
 /// SSE frame boundaries and UTF-8 may be split across arbitrary network chunks.
 Future<String> parseResponseStream(
   Stream<List<int>> bytes,
-  void Function(String) onPartial,
-) async {
+  void Function(String) onPartial, {
+  ProbeTrace? trace,
+}) async {
+  Never reject(String reason, [String code = 'stream']) {
+    trace?.note('parser_rejected reason=$reason');
+    throw AuthFailure(code);
+  }
+
   final data = <String>[];
   var text = '';
   var size = 0;
@@ -311,11 +330,15 @@ Future<String> parseResponseStream(
   String? responseId;
   await for (final line
       in bytes
+          .map((chunk) {
+            trace?.chunk(chunk.length);
+            return chunk;
+          })
           .timeout(const Duration(seconds: 25))
           .transform(utf8.decoder)
           .transform(const LineSplitter())) {
     size += line.length;
-    if (size > 512 * 1024) throw const AuthFailure('stream');
+    if (size > 512 * 1024) reject('size_limit');
     if (line.startsWith('data:')) {
       sawData = true;
       data.add(line.substring(5).replaceFirst(RegExp(r'^ '), ''));
@@ -323,22 +346,23 @@ Future<String> parseResponseStream(
     if (line.isNotEmpty || data.isEmpty) continue;
     final payload = data.join('\n');
     data.clear();
-    if (payload == '[DONE]') throw const AuthFailure('stream');
+    if (payload == '[DONE]') reject('DONE_before_completed');
     Map<String, dynamic> event;
     try {
       event = jsonDecode(payload) as Map<String, dynamic>;
     } catch (_) {
-      throw const AuthFailure('stream');
+      reject('event_not_json_object');
     }
+    trace?.event(event);
     final type = event['type'];
     if (type == 'response.created') {
       final response = event['response'];
       if (response is! Map || response['id'] is! String) {
-        throw const AuthFailure('stream');
+        reject('created_missing_id');
       }
       responseId = response['id'] as String;
     } else if (type == 'response.output_text.delta') {
-      if (event['delta'] is! String) throw const AuthFailure('stream');
+      if (event['delta'] is! String) reject('delta_not_string');
       text += event['delta'] as String;
       onPartial(text);
     } else if (type == 'response.failed' ||
@@ -348,18 +372,18 @@ Future<String> parseResponseStream(
       final error = response is Map ? response['error'] : event['error'];
       if (error is Map &&
           error['code'] == 'subscription_sharing_usage_limit_exceeded') {
-        throw const AuthFailure('quota');
+        reject('quota_event', 'quota');
       }
-      throw const AuthFailure('stream');
+      reject('terminal_failure_event');
     } else if (type == 'response.completed') {
       final response = event['response'];
-      if (response is! Map ||
-          response['status'] != 'completed' ||
-          response['id'] is! String ||
-          (responseId != null && response['id'] != responseId) ||
-          response['output'] is! List) {
-        throw const AuthFailure('stream');
+      if (response is! Map) reject('completed_response_not_object');
+      if (response['status'] != 'completed') reject('completed_status_invalid');
+      if (response['id'] is! String) reject('completed_id_missing');
+      if (responseId != null && response['id'] != responseId) {
+        reject('completed_id_mismatch');
       }
+      if (response['output'] is! List) reject('completed_output_not_list');
       final result = StringBuffer();
       for (final output in response['output'] as List) {
         if (output is Map &&
@@ -375,11 +399,26 @@ Future<String> parseResponseStream(
           }
         }
       }
-      if (result.isEmpty) throw const AuthFailure('stream');
+      if (result.isEmpty) reject('completed_no_assistant_text');
+      trace?.note('validated_completion text_characters=${result.length}');
       return result.toString();
     }
   }
-  if (size == 0) throw const AuthFailure('stream_empty');
-  if (!sawData) throw const AuthFailure('stream_no_events');
-  throw const AuthFailure('stream');
+  trace?.note(
+    'EOF characters=$size pending_data_lines=${data.length} partial_text_characters=${text.length} created_id_seen=${responseId != null}',
+  );
+  if (data.isNotEmpty && trace != null) {
+    trace.note('unterminated_frame_diagnostic_only');
+    try {
+      final pending = jsonDecode(data.join('\n'));
+      if (pending is Map<String, dynamic>) trace.event(pending);
+    } catch (_) {
+      trace.note('unterminated_frame_not_json_object');
+    }
+  }
+  if (size == 0) reject('empty_body', 'stream_empty');
+  if (!sawData) reject('no_data_fields', 'stream_no_events');
+  reject(
+    data.isEmpty ? 'EOF_without_completed' : 'EOF_with_unterminated_frame',
+  );
 }

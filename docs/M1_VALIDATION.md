@@ -2,6 +2,16 @@
 
 ## Status and feasibility
 
+### M1.6 comprehensive response diagnostics (1.1.6+8)
+
+Owner supplied M1.5 screenshots showing generated Russian text followed by `response / stream / HTTP 200 / media=missing`. This confirms receipt of text deltas, not validated completion. The previous one-code-per-build diagnostic approach was insufficient. No specific terminal-event cause is established by these screenshots.
+
+M1.6 adds a memory-only structural report below the GPT test, with **Копировать весь отчёт**. It records version, UTC start, elapsed timestamps, endpoint, selected model, request flags, HTTP status/content length/header count/media category, byte/chunk/event counts, first and recent event history, response status, ID presence (never ID value), output/content types and text lengths, allowlisted error codes, pending-frame count at EOF, exact validation rejection, and final UI result. First 10 and last 50 entries are retained; event counters include all parsed events. A pending JSON event at EOF is inspected for diagnostics only, never treated as completed inference.
+
+Raw payloads/headers, OAuth credentials, account identities, response IDs, generated text and arbitrary provider messages are excluded. Unknown enum values become `other`. No report is written to disk, automatically uploaded, or sent without user action. New request/account change/logout clears the previous report. This broad instrumentation does not change the success criteria or add retries/requests. The phone's actual terminal failure remains pending diagnosis from the report.
+
+Local formatting, analysis and 84 tests passed, including malformed-completion reason, unterminated final frame, bounded history after 1000 deltas, secret redaction, report visibility and logout cleanup. Existing offline regressions pass. Install M1.6, make one explicit test request, then copy **the whole report** instead of another screenshot of only the short code. Do not repeat requests to gather identical failures. Real completed inference and remaining device acceptance checks are still pending.
+
 ### M1.5 headerless streaming (1.1.5+7)
 
 Build evidence: [successful run 38948025291](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38948025291), code commit `d526c78a76a759e99fe43556bb277363762b8446`. Formatting, analysis, all 81 tests and Android debug build passed. Artifact: `guide-ryadom-m1-debug`. Physical retry pending.

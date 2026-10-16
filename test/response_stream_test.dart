@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guide_ryadom/domain/auth.dart';
+import 'package:guide_ryadom/domain/probe_trace.dart';
 import 'package:guide_ryadom/infrastructure/auth/openai_transport.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -32,6 +33,72 @@ Stream<List<int>> chunks(String value) =>
     Stream.fromIterable(utf8.encode(value).map((b) => [b]));
 
 void main() {
+  test(
+    'trace identifies malformed completion and omits all payload secrets',
+    () async {
+      final trace = ProbeTrace();
+      final event = completed();
+      (event['response'] as Map)['status'] = 'SECRET';
+      (event['response'] as Map)['id'] = 'SECRET';
+      (event['response'] as Map)['error'] = {
+        'code': 'SECRET',
+        'message': 'SECRET',
+      };
+      final transport = OpenAiTransport(
+        MockClient.streaming(
+          (_, _) async => http.StreamedResponse(
+            chunks(frame(event)),
+            200,
+            headers: {'set-cookie': 'SECRET'},
+          ),
+        ),
+      );
+      await expectLater(
+        transport.probe('SECRET', 'model', (_) {}, trace: trace),
+        throwsA(isA<AuthFailure>()),
+      );
+      expect(trace.report, contains('completed_status_invalid'));
+      expect(trace.report, contains('response.completed'));
+      expect(trace.report, contains('media=missing'));
+      expect(trace.report, isNot(contains('SECRET')));
+      expect(trace.bytes, greaterThan(0));
+    },
+  );
+
+  test('trace distinguishes EOF with pending completed event from missing completion', () async {
+    final trace = ProbeTrace();
+    await expectLater(
+      parseResponseStream(
+        chunks('data: ${jsonEncode(completed())}\n'),
+        (_) {},
+        trace: trace,
+      ),
+      throwsA(isA<AuthFailure>()),
+    );
+    expect(trace.report, contains('EOF_with_unterminated_frame'));
+    expect(trace.report, contains('response.completed'));
+    expect(trace.report, isNot(contains('validated_completion')));
+  });
+
+  test(
+    'trace remains bounded and keeps terminal reason after many deltas',
+    () async {
+      final trace = ProbeTrace();
+      final content = List.filled(
+        1000,
+        frame({'type': 'response.output_text.delta', 'delta': 'SECRET'}),
+      ).join();
+      await expectLater(
+        parseResponseStream(chunks(content), (_) {}, trace: trace),
+        throwsA(isA<AuthFailure>()),
+      );
+      expect(trace.report, contains('EOF_without_completed'));
+      expect(trace.counts['response.output_text.delta'], 1000);
+      expect(trace.report.length, lessThan(30000));
+      expect(trace.report, isNot(contains('SECRET')));
+    },
+  );
+
   for (final entry in <String, String>{
     '': 'stream_empty',
     jsonEncode(completed()): 'stream_no_events',
@@ -121,7 +188,7 @@ void main() {
         expect(failure.media, entry.value);
         expect(
           failure.diagnostic,
-          'M1.5 / response / response_format / HTTP 200 / media=${entry.value.name}',
+          'M1.6 / response / response_format / HTTP 200 / media=${entry.value.name}',
         );
         expect(failure.diagnostic, isNot(contains('TOKEN')));
         expect(cancelled, isTrue);

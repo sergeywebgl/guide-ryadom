@@ -1,3 +1,5 @@
+import 'probe_trace.dart';
+
 class AccountInfo {
   const AccountInfo({
     required this.clientId,
@@ -28,7 +30,11 @@ abstract interface class AuthProvider {
   /// True only if remote revocation was confirmed (or there was no session).
   Future<bool> signOut();
   Future<List<AvailableModel>> discoverModels();
-  Future<String> probe(String model, void Function(String) onPartial);
+  Future<String> probe(
+    String model,
+    void Function(String) onPartial, {
+    ProbeTrace? trace,
+  });
   void dispose();
 }
 
@@ -90,7 +96,7 @@ class AuthFailure implements Exception {
     media: media,
   );
   String get diagnostic =>
-      'M1.5 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
+      'M1.6 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
   String? get stageLabel => switch (stage) {
     AuthStage.restore => 'Чтение сохранённой сессии',
     AuthStage.host => 'Подготовка установки',

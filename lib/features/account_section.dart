@@ -30,7 +30,7 @@ class _AccountSectionState extends State<AccountSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Аккаунт ChatGPT · M1.5',
+                'Аккаунт ChatGPT · M1.6',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -161,6 +161,25 @@ class _AccountSectionState extends State<AccountSection> {
                   ),
                   SelectableText(c.text),
                 ],
+              ],
+              if (c.trace != null) ...[
+                const Divider(height: 28),
+                Text(
+                  'Подробная диагностика',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Text(
+                  'Отчёт хранится только в памяти. Токены и содержимое ответа исключены.',
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Clipboard.setData(ClipboardData(text: c.trace!.report)),
+                  child: const Text('Копировать весь отчёт'),
+                ),
+                SelectableText(
+                  c.trace!.report,
+                  style: const TextStyle(fontSize: 12),
+                ),
               ],
               const SizedBox(height: 12),
               const Text(

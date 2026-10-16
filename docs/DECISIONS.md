@@ -1,5 +1,9 @@
 # Engineering decisions & open questions
 
+## M1.6 — diagnose completion in one report
+
+Owner received text deltas in M1.5 but no accepted completion. Replace incremental short-code diagnosis with bounded structural tracing through transport, SSE parser and UI. Expose event counts/history, timings, terminal response shape and exact rejection without raw bodies, credentials or account data. Trace is optional through the provider boundary and memory-only. Do not infer completion from fluent text or relax terminal validation without evidence. Tests cover malformed completion, pending EOF frame, bounded/redacted history and UI cleanup; device report is still required.
+
 ## M1.5 — validate headerless Responses bodies
 
 Observed M1.4 HTTP 200/media=missing confirms the premature Content-Type rejection but not the body format. Accept an absent header only by parsing the same documented SSE events and requiring valid completed output. Explicit incompatible types remain errors; JSON is never a success fallback. A failing transport regression with a headerless valid SSE body passes after this change. Add safe empty/no-event distinctions and retain status/media on parser errors. Actual inference on the phone still requires owner confirmation. See M1_VALIDATION.md and the official models-and-inference reference there.

@@ -1,3 +1,4 @@
+import 'package:guide_ryadom/domain/probe_trace.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guide_ryadom/domain/auth.dart';
@@ -34,7 +35,11 @@ class FakeAuth implements AuthProvider {
     const AvailableModel('model', 'Доступная модель'),
   ];
   @override
-  Future<String> probe(String model, void Function(String) onPartial) async {
+  Future<String> probe(
+    String model,
+    void Function(String) onPartial, {
+    ProbeTrace? trace,
+  }) async {
     onPartial('Часть ответа');
     if (failProbe) throw const AuthFailure('stream', stage: AuthStage.response);
     return 'Полный ответ';
@@ -76,8 +81,10 @@ void main() {
     expect(find.text('Ответ завершён · response.completed'), findsNothing);
     expect(find.text('Частичный ответ — успех не подтверждён'), findsOneWidget);
     expect(find.text('Этап: Получение ответа GPT'), findsOneWidget);
-    expect(find.text('Диагностика: M1.5 / response / stream'), findsOneWidget);
+    expect(find.text('Диагностика: M1.6 / response / stream'), findsOneWidget);
     expect(find.text('Копировать код ошибки'), findsOneWidget);
+    expect(find.text('Копировать весь отчёт'), findsOneWidget);
+    expect(c.trace!.report, contains('UI completed=false'));
     await tester.ensureVisible(find.text('Отключить аккаунт'));
     await tester.tap(find.text('Отключить аккаунт'));
     await tester.pumpAndSettle();
@@ -85,6 +92,8 @@ void main() {
     expect(find.text('Подключить ChatGPT'), findsOneWidget);
     expect(find.text('Часть ответа'), findsNothing);
     expect(find.text('Копировать код ошибки'), findsNothing);
+    expect(find.text('Копировать весь отчёт'), findsNothing);
+    expect(c.trace, isNull);
     expect(tester.takeException(), isNull);
   });
 

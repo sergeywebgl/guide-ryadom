@@ -1,3 +1,5 @@
+import '../../domain/probe_trace.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -482,16 +484,17 @@ class ChatGptAuthService implements AuthProvider {
       });
 
   @override
-  Future<String> probe(String model, void Function(String) onPartial) => _run((
-    transport,
-    epoch,
-  ) async {
+  Future<String> probe(
+    String model,
+    void Function(String) onPartial, {
+    ProbeTrace? trace,
+  }) => _run((transport, epoch) async {
     if (!_models.any((m) => m.slug == model)) throw const AuthFailure('models');
     final token = await _access(transport, epoch);
     _stage = AuthStage.response;
     final result = await transport.probe(token, model, (text) {
       if (epoch == _epoch && !_disposed) onPartial(text);
-    });
+    }, trace: trace);
     _check(epoch);
     return result;
   });

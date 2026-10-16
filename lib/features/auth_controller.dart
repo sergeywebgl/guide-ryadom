@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../domain/auth.dart';
+import '../domain/probe_trace.dart';
 
 enum AccountState { disconnected, connecting, connected, error }
 
@@ -14,6 +15,7 @@ class AuthController extends ChangeNotifier {
   String? message;
   AuthFailure? failure;
   String text = '';
+  ProbeTrace? trace;
   List<AvailableModel> models = [];
   String? selectedModel;
   bool _disposed = false;
@@ -48,6 +50,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> connect({String? clientId}) async {
     if (busy) return;
+    trace = null;
     busy = true;
     completed = false;
     text = '';
@@ -80,6 +83,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> disconnect() async {
     if (busy) return;
+    trace = null;
     busy = true;
     failure = null;
     completed = false;
@@ -117,6 +121,7 @@ class AuthController extends ChangeNotifier {
   }
 
   void selectModel(String? value) {
+    trace = null;
     selectedModel = value;
     completed = false;
     text = '';
@@ -126,6 +131,7 @@ class AuthController extends ChangeNotifier {
   Future<void> runProbe() async {
     final model = selectedModel;
     if (busy || model == null) return;
+    trace = ProbeTrace()..note('probe_started');
     busy = true;
     completed = false;
     text = '';
@@ -136,10 +142,12 @@ class AuthController extends ChangeNotifier {
       text = await provider.probe(model, (partial) {
         text = partial;
         _notify();
-      });
+      }, trace: trace);
       completed = true;
+      trace?.note('UI completed=true');
     } catch (e) {
       _error(e);
+      trace?.note('UI completed=false ${failure!.diagnostic}');
     } finally {
       busy = false;
       _notify();
