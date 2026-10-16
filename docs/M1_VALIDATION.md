@@ -44,7 +44,9 @@ Local toolchain: Flutter 3.47.7 / Dart 3.13.5 on Windows. Tests use synthetic id
 
 Checks run: formatting (20 files, no changes), `flutter analyze` (no issues), `flutter test` (**51 passed**). Coverage includes the RFC7636 PKCE vector, secure-value shape/uniqueness, callback origin/state/client/duplicates, denied login, nonce and other signed-claim failures, invalid signature, unusable token responses, failed exchange, cancel/timeout, serialized operations, refresh rotation and failed persistence, scope restrictions, local logout despite failed revocation, independent account state, streamed responses and HTTP failures, missing completion, account UI/logout, 320px/200% text, and original offline regression tests. A real local loopback socket test verifies listener/path behavior on the test host; it is **not an Android browser test**.
 
-Android SDK is absent locally. The existing GitHub Actions workflow runs formatting, analysis, tests and `flutter build apk --debug`, then uploads `guide-ryadom-m1-debug` only on success. Build evidence and exact run link will be recorded after completion. Compilation does not prove live authorization or Keystore operation on a physical phone.
+Local `flutter build apk --debug` was attempted and stopped with `No Android SDK found`. The existing GitHub Actions workflow completed successfully: [M1 run 38898910026](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38898910026), code commit `bd8cbe777d3e00ecd7e3252ffd7840556178ad63`. Formatting, analysis, all 51 tests, Android debug build (including Kotlin bridge) and artifact upload passed. Download `guide-ryadom-m1-debug` from that run. Compilation does not prove live authorization or Keystore operation on a physical phone.
+
+The successful workflow reports maintenance warnings about older action versions and an upcoming `ubuntu-latest` image migration. These did not fail this build; workflow modernization is a separate maintenance task.
 
 ## Owner's installation and acceptance checklist
 
@@ -64,7 +66,7 @@ Report only: device/browser versions, exact step, sanitized visible error, wheth
 
 | Requirement | Evidence |
 | --- | --- |
-| Android compilation/APK | Pending M1 CI result at initial commit |
+| Android compilation/APK | Passed in run 38898910026, artifact guide-ryadom-m1-debug |
 | Offline demo | M0 owner smoke test confirmed; M1 automated regression passes; M1 device regression pending |
 | Browser initiation and loopback result on Android | Pending owner |
 | Real token/identity/scope validation | Mocks pass; live account pending owner |

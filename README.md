@@ -27,7 +27,7 @@ flutter build apk --debug
 
 APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m1-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
 
-**M1 download:** open [Flutter workflow runs](https://github.com/sergeywebgl/guide-ryadom/actions/workflows/flutter.yml), choose a successful M1 run and download `guide-ryadom-m1-debug`. Unzip and install `app-debug.apk`. In Settings, tap **Подключить ChatGPT**, finish consent in the system browser, return to the app, then tap **Отправить тестовый запрос**. Only **Ответ завершён · response.completed** confirms the request completed. No API key is needed. Full instructions and update-signing caveat: [M1_VALIDATION.md](docs/M1_VALIDATION.md).
+**M1 download:** open [successful M1 build 38898910026](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38898910026) (code `bd8cbe7`) and download `guide-ryadom-m1-debug`. Format, analysis, 51 tests and Android build passed. Unzip and install `app-debug.apk`. In Settings, tap **Подключить ChatGPT**, finish consent in the system browser, return to the app, then tap **Отправить тестовый запрос**. Only **Ответ завершён · response.completed** confirms the request completed. No API key is needed. Full instructions and update-signing caveat: [M1_VALIDATION.md](docs/M1_VALIDATION.md).
 
 To build only the offline interface: `flutter run --dart-define=ENABLE_CHATGPT_AUTH=false` (or pass the same define to `flutter build apk --debug`).
 
