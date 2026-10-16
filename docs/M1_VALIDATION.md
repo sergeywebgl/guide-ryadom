@@ -10,7 +10,7 @@ A regression test reproduced a diagnostic defect: an internal StateError during 
 
 **The owner's underlying sign-in failure is not yet diagnosed or fixed.** Synthetic failures verify the diagnostic mechanism, not the cause on the phone. Retry with the M1.1 APK, confirm the account heading says M1.1, then copy the error code if login fails. Examples such as `M1.1 / exchange / network / socket` are illustrative, not observed phone results. No OAuth checks or TLS verification were weakened, no code exchange is automatically retried and no alternate endpoint was added.
 
-Local checks: formatting, analysis and 58 tests pass. The failing diagnostic regression was observed before the fix and passes afterward. M1.1 CI/APK evidence is recorded after the build below. Physical login and inference remain pending.
+Local checks: formatting, analysis and 58 tests pass. The failing diagnostic regression was observed before the fix and passes afterward. [M1.1 CI run 38901787135](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38901787135) passed formatting, analysis, 58 tests and Android debug build for code commit `e957be17e13469d044a1efa3075fa3d6f68850fd`; download artifact `guide-ryadom-m1-debug` from this run for version 1.1.1+3. Physical login and inference remain pending.
 
 M0 was installed and smoke-tested successfully on a real Android phone **according to the owner**. No additional M0 device tests are claimed.
 
@@ -78,7 +78,7 @@ Report only: device/browser versions, exact step, sanitized visible error, wheth
 | --- | --- |
 | Android compilation/APK | Passed in run 38898910026, artifact guide-ryadom-m1-debug |
 | Offline demo | M0 owner smoke test confirmed; M1 automated regression passes; M1 device regression pending |
-| Browser initiation and loopback result on Android | Pending owner |
+| Browser initiation and loopback result on Android | Owner reached consent and the callback return page on one phone; subsequent sign-in failed; second phone pending |
 | Real token/identity/scope validation | Mocks pass; live account pending owner |
 | Eligible model and completed streamed GPT response | Mocks pass; live account pending owner |
 | Result visible in app, cancellation and logout | Widget/service tests pass; physical device pending owner |
