@@ -4,7 +4,7 @@ A voice-first, location-aware AI walking-tour guide. **Personal open-source prot
 
 **Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **Real device authentication and subscription inference remain pending owner validation**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
 
-**Latest APK — M1.1 diagnostic update (1.1.1+3):** [successful build 38901787135](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38901787135), artifact `guide-ryadom-m1-debug`. Owner reached the browser callback page but the app reported a generic network error. The cause is still unknown. The updated account screen distinguishes failure stages and provides **Копировать код ошибки**; send that safe code after retrying. This improves diagnosis and does not claim to fix the live sign-in failure. It contains no tokens or authorization URLs.
+**Latest APK — M1.2 (1.1.2+4):** [successful build 38902996583](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38902996583), artifact `guide-ryadom-m1-debug`. Owner reached the browser callback and reported `exchange / network / socket`. M1.2 uses a fresh HTTP client after the browser round trip and adds a numeric OS error to the safe diagnostic when available. All 60 tests and the Android build passed. The actual phone/network cause remains unconfirmed; retry login and use **Копировать код ошибки** if it fails. No tokens or authorization URLs are included.
 
 ## Run the app
 

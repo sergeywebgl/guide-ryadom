@@ -4,6 +4,8 @@
 
 ### M1.2 connection isolation (1.1.2+4)
 
+Build evidence: [successful run 38902996583](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38902996583), code commit `c61fc53408942a1e8d8bee032f9a5c9e99b7f682`. Formatting, analysis, 60 tests and Android debug build passed. Download `guide-ryadom-m1-debug` from this run. Owner device retry pending.
+
 Owner supplied the actual M1.1 diagnostic: `exchange / network / socket`. Callback validation and listener shutdown were therefore reached; no completed token exchange is established. A socket exception alone does not identify DNS, reset, connectivity policy or reuse of an old connection.
 
 The first hypothesis under test is reuse of the pre-browser metadata client's connections after consent/backgrounding. [Dart documents persistent connection caching](https://api.dart.dev/dart-io/HttpClient-class.html). A fault-injection test modeled a socket failure when the same client was used before and after the browser round trip; it failed before the change and passes afterward. This is a synthetic regression, **not reproduction of the owner's actual network condition**.
