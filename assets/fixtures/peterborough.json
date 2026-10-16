@@ -1,0 +1,158 @@
+{
+  "revision": "2026-10-16",
+  "note": "Original short Russian demo summaries; deliberately shorter than production narration targets. Sources checked 2026-10-16; no third-party images or quotations.",
+  "sources": [
+    {
+      "id": "history",
+      "title": "Peterborough Cathedral — History",
+      "url": "https://peterborough-cathedral.org.uk/about/history/"
+    },
+    {
+      "id": "architecture",
+      "title": "National Churches Trust — Peterborough Cathedral",
+      "url": "https://www.nationalchurchestrust.org/church/peterborough-cathedral"
+    },
+    {
+      "id": "katharine",
+      "title": "Peterborough Cathedral — Katharine of Aragon",
+      "url": "https://peterborough-cathedral.org.uk/about/history/katharine-of-aragon/"
+    },
+    {
+      "id": "mary",
+      "title": "Westminster Abbey — Mary Queen of Scots",
+      "url": "https://www.westminster-abbey.org/abbey-commemorations/royals/mary-queen-of-scots"
+    }
+  ],
+  "stops": [
+    {
+      "id": "facade",
+      "title": "Камень, переживший века",
+      "subtitle": "Западный фасад собора",
+      "sources": [
+        "history",
+        "architecture"
+      ],
+      "intro": {
+        "id": "facade.intro",
+        "text": "Начнём у западного фасада — одного из самых выразительных средневековых фасадов Англии. История нынешнего здания началась с катастрофы: в 1116 году пожар опустошил монастырь и часть города. Строительство новой церкви началось в 1118 году. Представьте, как на месте разрушений постепенно появлялось это огромное здание.",
+        "claims": [
+          "west-front",
+          "fire-1116",
+          "construction-1118"
+        ],
+        "sources": [
+          "history",
+          "architecture"
+        ]
+      },
+      "detail": {
+        "id": "facade.detail",
+        "text": "Название «собор» появилось позже самого здания. Церковь освятили в 1238 году, когда она была частью монастыря. В 1539 году аббатство распустили. В 1541 году Генрих VIII учредил здесь епископскую кафедру: монастырская церковь стала собором. Одно здание пережило смену своей роли в жизни города.",
+        "claims": [
+          "consecration-1238",
+          "dissolution-1539",
+          "cathedral-1541"
+        ],
+        "sources": [
+          "history"
+        ]
+      },
+      "surprise": {
+        "id": "facade.surprise",
+        "text": "Внутри стоит посмотреть вверх: одна из главных достопримечательностей — расписной деревянный потолок нефа. Впечатление от средневекового храма создавали не только каменные стены. Осмотрите его, когда окажетесь внутри; схема демо не заменяет указателей собора.",
+        "claims": [
+          "painted-ceiling"
+        ],
+        "sources": [
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "katharine",
+      "title": "Королева и гранаты",
+      "subtitle": "Могила Екатерины Арагонской",
+      "sources": [
+        "katharine"
+      ],
+      "intro": {
+        "id": "katharine.intro",
+        "text": "Здесь находится могила Екатерины Арагонской, первой жены Генриха VIII. Последние годы её жизни прошли в изгнании; она умерла в замке Кимболтон в 1536 году. Эта остановка связывает историю Питерборо с королевским двором — и с человеком, чья судьба оказалась частью огромных перемен в Англии.",
+        "claims": [
+          "first-wife",
+          "kimbolton-1536",
+          "katharine-burial"
+        ],
+        "sources": [
+          "katharine"
+        ]
+      },
+      "detail": {
+        "id": "katharine.detail",
+        "text": "До брака с Генрихом Екатерина была женой его брата Артура. Она приехала в Англию в 1501 году и овдовела всего через пять месяцев. В 1509 году вышла за Генриха. Из её шестерых детей выжила только Мария — будущая Мария I. За королевскими именами стоит история семейных потерь.",
+        "claims": [
+          "arthur-marriage",
+          "henry-1509",
+          "mary-survived"
+        ],
+        "sources": [
+          "katharine"
+        ]
+      },
+      "surprise": {
+        "id": "katharine.surprise",
+        "text": "Посетители нередко оставляют у могилы гранаты. Это символ Екатерины. Память о ней поддерживают и ежегодным фестивалем в соборе. Обычный плод здесь превращается в маленький знак памяти, понятный спустя столетия.",
+        "claims": [
+          "pomegranate-symbol",
+          "annual-festival"
+        ],
+        "sources": [
+          "katharine"
+        ]
+      }
+    },
+    {
+      "id": "mary",
+      "title": "Могила, ставшая памятью",
+      "subtitle": "Первое захоронение Марии Стюарт",
+      "sources": [
+        "mary"
+      ],
+      "intro": {
+        "id": "mary.intro",
+        "text": "Это место первого захоронения Марии Стюарт, королевы Шотландии. После её смерти в 1587 году её похоронили в Питерборо. Однако останков здесь больше нет: в 1612 году их перенесли в Вестминстерское аббатство. Перед нами место памяти, а не нынешняя могила королевы.",
+        "claims": [
+          "mary-1587",
+          "reburial-1612"
+        ],
+        "sources": [
+          "mary"
+        ]
+      },
+      "detail": {
+        "id": "mary.detail",
+        "text": "Перенести останки приказал её сын, король Яков I. В Вестминстере он устроил для матери мраморное надгробие в южном проходе капеллы Богоматери. Там находится белое скульптурное изображение королевы под сложным балдахином. История этого захоронения связывает два храма и два поколения одной семьи.",
+        "claims": [
+          "james-order",
+          "marble-tomb",
+          "white-effigy"
+        ],
+        "sources": [
+          "mary"
+        ]
+      },
+      "surprise": {
+        "id": "mary.surprise",
+        "text": "Королевский приказ о переносе датирован 28 сентября 1612 года, а перезахоронение состоялось 11 октября. Подробного описания сопровождавшей останки процессии не сохранилось. Даже в истории монархов остаются пробелы: хороший рассказ должен признавать их, а не заполнять выдуманными подробностями.",
+        "claims": [
+          "warrant-date",
+          "reburial-day",
+          "procession-unknown"
+        ],
+        "sources": [
+          "mary"
+        ]
+      }
+    }
+  ]
+}

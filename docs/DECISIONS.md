@@ -1,5 +1,16 @@
 # Engineering decisions & open questions
 
+## M0 implementation record — 16 October 2026
+
+- Flutter 3.47.7 / Dart 3.13.5 standard Android scaffold; no runtime third-party packages. ChangeNotifier coordinates UI while TourEngine and ports remain pure Dart.
+- Consume a segment when displayed. Loading/preparing fixture content never marks a segment as displayed. Revision-based transitions and controller serialization prevent duplicate next actions from the same screen state.
+- Source-grounded short Russian demo summaries and an original schematic arch illustration; no remote photos, network services or fabricated citations.
+- Audio is explicitly unavailable, not simulated as playing. Camera is deferred to M4; location is a labelled mock. No real permission prompts in M0.
+- Persistent storage deferred: memory adapter only, clearly disclosed in settings and README. Story lengths are intentionally reduced for the first demo.
+- Direct pushes to main authorized by owner; no PR required. M1 remains a separate reviewed task. The README's original parallel OAuth suggestion was corrected to match kickoff.
+- Local Flutter checks are available after installing a workspace SDK. Android SDK/device are absent; APK build attempted and blocked. CI includes APK build but device behavior must still be validated.
+
+
 ## ADR-001 (proposed): Android-first Flutter and domain/provider separation
 
 **Decision:** Flutter for presentation; pure Dart domain/ports; per-platform adapters. **Why:** ship quickly on Android while preserving future iOS and audio/AR glasses integrations. **Trade-off:** some OAuth and glasses SDK functionality requires native Kotlin bridges.

@@ -24,6 +24,8 @@ Read `README.md`, `docs/PRODUCT.md`, `docs/DESIGN.md`, and `docs/ROADMAP.md` bef
 
 ## Coding task process
 
+Owner workflow: commit and push directly to `main` after relevant checks; no pull request or repeated permission request is needed for routine scoped implementation. Stop at the current milestone boundary. This supersedes older PR instructions in planning documents.
+
 1. Identify milestone and acceptance criteria.
 2. Implement domain contracts + fake adapters first.
 3. Build functional UI with error/empty states.
