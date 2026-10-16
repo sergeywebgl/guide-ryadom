@@ -4,6 +4,8 @@
 
 ### M1.5 headerless streaming (1.1.5+7)
 
+Build evidence: [successful run 38948025291](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38948025291), code commit `d526c78a76a759e99fe43556bb277363762b8446`. Formatting, analysis, all 81 tests and Android debug build passed. Artifact: `guide-ryadom-m1-debug`. Physical retry pending.
+
 Owner's M1.4 screenshot reports `response / response_format / HTTP 200 / media=missing`. This rules out MIME capitalization as the explanation for that attempt: the app saw no usable Content-Type. The rejected body was not read, so neither valid SSE nor empty/JSON/HTML content is established. Standard Dart HTTP is used, without a custom response-header adapter.
 
 A transport regression with HTTP 200, no Content-Type and valid SSE reproduced the observed rejection before the fix. M1.5 now reads a headerless response through the existing SSE parser; explicit incompatible media types remain rejected. This is client-side tolerance for absent metadata, not an alternate endpoint or authentication method. The official public Responses request is unchanged. Success still requires a valid `response.completed`, completed status, matching response ID when created was received, and nonempty assistant output. JSON-200 is never accepted as completion.
