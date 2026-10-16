@@ -16,9 +16,13 @@ Domain has no Flutter imports. Provider seams: AiProvider, PoiRepository, Locati
 - `flutter doctor -v`: Android SDK absent, no Android device/emulator connected.
 - `flutter build apk --debug`: failed with `No Android SDK found`. GitHub Actions is configured to build with its Android toolchain and upload an APK only after success. Consult the actual run for remote build evidence.
 
-## Manual Android acceptance still needed
+## Owner's real-device smoke test confirmed
+
+The owner reports that M0 was installed and manually tested on a real Android phone and that the offline demo works correctly. This is owner-reported evidence, not a device test performed by Codex. Device model, Android version, second-phone coverage, accessibility checks and individual checklist results were not supplied; those must not be inferred from the smoke-test confirmation.
 
 Remote build confirmed: [GitHub Actions run 38863116504](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38863116504) succeeded for commit `4ac41f47a61de7f50593b83e4f60f1fc2672ce49`: formatting, analysis, all tests, debug APK build and artifact upload. Download `guide-ryadom-m0-debug` from that run and extract `app-debug.apk`. This proves compilation, not behavior on a physical device.
+
+Remaining detailed checklist (not individually confirmed):
 
 1. Build/install the debug APK on each phone; record Android version and device model.
 2. Enable airplane mode before cold launch. Complete all three stops without credentials; no permission requests should appear.
@@ -27,6 +31,6 @@ Remote build confirmed: [GitHub Actions run 38863116504](https://github.com/serg
 5. Verify camera and audio controls explain unavailable functionality. They must not capture, upload or pretend to play audio.
 6. Kill/relaunch: current M0 intentionally resets state. Settings explicitly disclose this.
 
-## Next task (not executed)
+## Handoff to M1
 
-Review M0 and perform the Android smoke test first. M1 is a time-boxed investigation of the current official SIWC contract and Android browser/loopback lifecycle, with each owner's account consent. Reverify external docs and eligibility before implementation. If unsupported, document the result and keep the offline demo working. No paid API substitution, camera/live GPS work, or M7 scheduler in this task.
+The owner accepted the M0 smoke test and authorized M1. See [M1 validation](M1_VALIDATION.md) for the official SIWC contract, implementation, automated evidence and remaining physical-device checks. No paid API substitution, camera/live GPS work, or M7 scheduler is authorized by M1.

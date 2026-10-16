@@ -1,5 +1,15 @@
 # Engineering decisions & open questions
 
+## M1 implementation record — 16 October 2026
+
+- Owner confirmed the M0 real-Android offline smoke test and explicitly authorized M1. No further device coverage is inferred.
+- Implement the official OSS SIWC contract with a Dart loopback listener and an Android system-browser/Keystore bridge, behind `AuthProvider` and `ENABLE_CHATGPT_AUTH`. Public metadata confirms the issuer, token and JWKS locations and RS256. Reviewed docs neither prove reliable Android support nor state a categorical prohibition; physical-device feasibility remains an acceptance gate. Sources and exact checks: [M1_VALIDATION.md](M1_VALIDATION.md).
+- Public OAuth endpoints and public Responses API only. No API-key fallback, embedded WebView, custom redirect scheme or private ChatGPT backend.
+- Retain issued-client/subject account mappings after logout. Credentials and stable host UUID are installation-local, excluded from backups. Verified email is a display label, never the account key.
+- Serialize operations. Persist a session tombstone before rotating refresh tokens so process death or failed replacement storage cannot revive the old token. The tradeoff is interactive reauthentication after an interrupted refresh.
+- Model discovery and explicit diagnostic inference are separate from the offline tour. A completed SSE response is the only success signal; generated diagnostic facts are unverified and cannot enter tour history.
+- HTTP, JWT and UI tests use mocks; local loopback socket tests are host-only. Keystore, browser/process lifecycle, account eligibility, actual consent/scopes and subscription inference require the two owners' physical-device checks. Stop at M1 pending these results.
+
 ## M0 implementation record — 16 October 2026
 
 - Flutter 3.47.7 / Dart 3.13.5 standard Android scaffold; no runtime third-party packages. ChangeNotifier coordinates UI while TourEngine and ports remain pure Dart.

@@ -2,9 +2,9 @@
 
 A voice-first, location-aware AI walking-tour guide. **Personal open-source prototype** for two separate Android devices, each using its owner's ChatGPT Plus account, subject to account eligibility and current Sign in with ChatGPT restrictions.
 
-**Status:** M0 offline Flutter Android demo implemented. Local format, analysis and tests pass; Android device validation is still outstanding. No ChatGPT sign-in or live AI is connected.
+**Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **Real device authentication and subscription inference remain pending owner validation**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
 
-## Run the M0 demo
+## Run the app
 
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 
@@ -25,9 +25,11 @@ flutter test
 flutter build apk --debug
 ```
 
-APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m0-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
+APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m1-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
 
-**Ready to try:** [successful M0 build and APK artifact](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38863116504), code commit `4ac41f4`. Download the `guide-ryadom-m0-debug` artifact, unzip it and install `app-debug.apk` on Android. Enable airplane mode and walk through the demo; device testing is still outstanding.
+**M1 download:** open [Flutter workflow runs](https://github.com/sergeywebgl/guide-ryadom/actions/workflows/flutter.yml), choose a successful M1 run and download `guide-ryadom-m1-debug`. Unzip and install `app-debug.apk`. In Settings, tap **Подключить ChatGPT**, finish consent in the system browser, return to the app, then tap **Отправить тестовый запрос**. Only **Ответ завершён · response.completed** confirms the request completed. No API key is needed. Full instructions and update-signing caveat: [M1_VALIDATION.md](docs/M1_VALIDATION.md).
+
+To build only the offline interface: `flutter run --dart-define=ENABLE_CHATGPT_AUTH=false` (or pass the same define to `flutter build apk --debug`).
 
 The temporary package ID is `com.example.guide_ryadom`. For release, update `applicationId` and `namespace` in `android/app/build.gradle.kts`, and the package declaration/path of `MainActivity.kt`; configure release signing separately. Do not commit signing keys.
 
@@ -37,10 +39,11 @@ The temporary package ID is `com.example.guide_ryadom`. For release, update `app
 - Distinct intro/detail/surprise segments, next/back/skip, explicit finish and restart; duplicate transitions are rejected.
 - Tour, schematic route and settings tabs; text size control; clear demo/no-account indicators.
 - Pure Dart domain and replaceable provider interfaces; prepared content does not become consumed until displayed.
+- Separate ChatGPT account UI, documented PKCE/OIDC loopback sign-in, Android Keystore encrypted credentials, model discovery, explicit streamed diagnostic request and logout. The tour continues using its offline fixture.
 
-### M0 limitations
+### Current limitations
 
-Audio, camera, live GPS/maps and OAuth are not connected. The Listen and camera controls explain their unavailable state. No network requests or device permissions are required by the demo (debug/profile manifests retain Flutter's standard INTERNET permission for tooling). Session and text settings reset when the process restarts; the repository adapter is in-memory. Narratives are deliberately shorter than production word-count targets. Background/lock-screen playback is not implemented.
+Audio, camera and live GPS/maps are not connected. The Listen and camera controls explain their unavailable state. No network requests or account are required by the demo. M1 uses INTERNET for explicit authentication/diagnostics; no location/camera permission is requested. Tour progress and text settings reset when the process restarts; OAuth credentials persist separately in Android-backed encrypted storage. Narratives are deliberately shorter than production word-count targets. Background/lock-screen playback is not implemented.
 
 Local validation on 16 October 2026: analysis clean and 9 tests passed, including 320px/200% text layout. Local APK build was attempted but blocked by **No Android SDK found**; this is not a successful device test. See [M0 validation](docs/M0_VALIDATION.md).
 
@@ -64,7 +67,7 @@ Walk around an unfamiliar city; the guide discovers relevant historical places, 
 
 ## First deliverable
 
-M0 implements the **offline demo** with the Peterborough Cathedral example and responsive Russian UI. The Android OAuth feasibility spike belongs to a separate M1 task after M0 review. Do **not** pretend subscription inference is working until it is tested on a physical device.
+M0 implements the **offline demo** with the Peterborough Cathedral example and responsive Russian UI. M1 is the authorized Android OAuth proof of concept; its physical-device acceptance gate remains open. Do **not** claim subscription inference is working until the owner completes that gate. The original kickoff is historical M0 scope; it must not restart M0 or expand the current M1 task into M2.
 
 ## Technology proposal
 

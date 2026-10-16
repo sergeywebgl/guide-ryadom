@@ -4,14 +4,17 @@ import 'package:flutter/services.dart';
 import '../domain/ports.dart';
 import '../domain/tour.dart';
 import '../features/tour_controller.dart';
+import '../features/auth_controller.dart';
+import '../features/account_section.dart';
 
 const _ink = Color(0xFF233E38);
 const _paper = Color(0xFFF7F3EB);
 const _bronze = Color(0xFF8A6034);
 
 class GuideApp extends StatelessWidget {
-  const GuideApp({super.key, required this.controller});
+  const GuideApp({super.key, required this.controller, this.auth});
   final TourController controller;
+  final AuthController? auth;
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Гид рядом',
@@ -30,13 +33,14 @@ class GuideApp extends StatelessWidget {
         style: OutlinedButton.styleFrom(minimumSize: const Size(48, 52)),
       ),
     ),
-    home: _GuideHome(controller: controller),
+    home: _GuideHome(controller: controller, auth: auth),
   );
 }
 
 class _GuideHome extends StatefulWidget {
-  const _GuideHome({required this.controller});
+  const _GuideHome({required this.controller, this.auth});
   final TourController controller;
+  final AuthController? auth;
   @override
   State<_GuideHome> createState() => _GuideHomeState();
 }
@@ -59,6 +63,7 @@ class _GuideHomeState extends State<_GuideHome> {
 
   @override
   void dispose() {
+    widget.auth?.dispose();
     c.dispose();
     super.dispose();
   }
@@ -401,13 +406,16 @@ class _GuideHomeState extends State<_GuideHome> {
   }
 
   List<Widget> _settings() => [
+    if (widget.auth != null) AccountSection(controller: widget.auth!),
     Text(
       'В своём темпе',
       style: Theme.of(context).textTheme.headlineMedium
           ?.copyWith(fontFamily: 'serif'),
     ),
     _notice(
-      'Офлайн-демо работает без аккаунта. ChatGPT не подключён. Запросы к AI не отправляются.',
+      widget.auth == null
+          ? 'Офлайн-демо работает без аккаунта. ChatGPT не подключён. Запросы к AI не отправляются.'
+          : 'Экскурсия работает офлайн. Подключение ChatGPT используется только для отдельного теста связи выше.',
     ),
     const Text(
       'Размер текста',

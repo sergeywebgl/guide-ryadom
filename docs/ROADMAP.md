@@ -1,6 +1,8 @@
 # Roadmap and acceptance criteria
 
-Use short Codex tasks/PRs, each independently reviewable. A milestone is only done after its acceptance criteria are demonstrated.
+Use short Codex tasks, each independently reviewable; direct pushes to main are authorized in AGENTS.md. A milestone is only done after its acceptance criteria are demonstrated.
+
+Current evidence: M0 owner-reported real-device smoke test passed. M1 implementation and automated checks are recorded in [M1_VALIDATION.md](M1_VALIDATION.md); physical Android OAuth/inference acceptance is pending. M2 has not started.
 
 ## M0 — Executable UI and isolated domain (first Codex task)
 
@@ -13,7 +15,7 @@ Use short Codex tasks/PRs, each independently reviewable. A milestone is only do
 - README commands, repo formatting, analysis; Android manifest includes only permissions actually required by implemented functionality.
 - **Deliverable:** screenshots and runnable app or explicit SDK environment limitation, tests green where SDK available.
 
-## M1 — Android ChatGPT plan OAuth feasibility spike (separate PR)
+## M1 — Android ChatGPT plan OAuth feasibility spike
 
 - Implement documented OIDC/PKCE and loopback listener behind a feature flag and public `AuthProvider` interface. Validate state, nonce, issuer/JWKS/audience, granted scopes, dynamic issued client ID, stable host ID.
 - System browser flow on physical Android phone, actual callback handling across app switching/return; no WebView or undocumented redirect workaround.

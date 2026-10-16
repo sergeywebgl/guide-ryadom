@@ -1,0 +1,75 @@
+# M1 — official ChatGPT OAuth Android proof of concept
+
+## Status and feasibility
+
+M0 was installed and smoke-tested successfully on a real Android phone **according to the owner**. No additional M0 device tests are claimed.
+
+M1 code implements the documented flow. Android device authorization, callback delivery, secure-storage behavior and a real subscription-funded completed response are **pending owner testing on both phones**. Do not mark M1 technically complete until those checks pass.
+
+Official documentation reviewed on 16 October 2026:
+
+- [OSS overview](https://developers.openai.com/siwc/token-sharing-open-source)
+- [Registration and sign-in](https://developers.openai.com/siwc/token-sharing-open-source/sign-in)
+- [Profiles and sessions](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)
+- [Models and inference](https://developers.openai.com/siwc/token-sharing-open-source/models-and-inference)
+- [Preview limitations](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations)
+- [Token reference](https://developers.openai.com/siwc/token-sharing-open-source/token-reference)
+- [Errors and recovery](https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery)
+- [Public OIDC metadata](https://auth.openai.com/.well-known/openid-configuration)
+- [Android Keystore](https://developer.android.com/privacy-and-security/keystore)
+
+The documented redirect is `http://127.0.0.1:<port>/auth/callback`; the listener must exist before browser authorization. No custom-scheme or localhost substitution is documented. The reviewed pages did not establish a categorical Android prohibition, but also did not establish reliable behavior on these two phones. A Dart IPv4 loopback server and Android system browser can implement the stated contract; whether Android keeps the process alive and the browser reaches it is a **device feasibility question**, not a proven capability. No alternative redirect, cookie extraction, embedded WebView, private backend endpoint or impersonated client was added.
+
+If OpenAI rejects the mobile flow, the browser cannot reach loopback, or OS lifecycle prevents reliable completion, record the exact sanitized error, browser/device versions and step. Stop live integration at that decision point. Supported directions for review are keeping the offline app, moving the documented loopback flow to a compatible desktop environment, or separately approving a properly hosted paid-API architecture. Neither a mobile redirect workaround nor a paid fallback is enabled.
+
+## Implemented
+
+- Pure Dart `AuthProvider` boundary; account controller and UI separate from TourEngine. `ENABLE_CHATGPT_AUTH` defaults to true; false builds retain the offline-only interface.
+- Dynamic registration starts with `dynamic_agent_client` and the actual application name. Returning accounts use their validated issued client ID. Callback client IDs are checked against the selected registration. Mappings use client ID plus validated subject, never email as identity.
+- Per-install UUIDv4 host identifier persisted in Android no-backup storage. Each phone keeps independent credentials and mappings.
+- Secure random state, nonce and verifier; PKCE S256; exact loopback URL reused during token exchange; duplicated/incorrect callback parameters and mismatched state rejected. Access-denied callbacks are also state-checked.
+- OIDC metadata from the official issuer, trusted issuer JWKS only, RS256 signature validation, issuer/audience/authorized-party/expiry/issued-at/nonce/subject checks. Refresh ID tokens, when returned, are signature and identity checked too. ID tokens are never treated as access tokens.
+- Only token-response scopes authorize inference; direct usage and resource invocation are required. Callback scopes are not trusted. Missing permission keeps the signed-in account visible and disables inference.
+- AES-256-GCM credential file, Android Keystore non-exported key, atomic writes, no Android backup. Crypto and storage run on a native worker thread. Codes and PKCE values are transient. App diagnostics use fixed safe messages, never raw URLs, tokens or provider error bodies.
+- One operation at a time prevents concurrent refresh-token use. Before refresh, a session tombstone is saved; only a complete replacement token set is saved afterward. A crash, failed storage write or ambiguous interrupted refresh requires new sign-in rather than reusing a potentially rotated token. The registration is retained. This intentionally favors correctness over seamless recovery.
+- Logout attempts official revocation, then clears local credentials while retaining host and account registration. A failed remote revocation is explicitly reported. A storage failure is an error, never a claim that persistent credentials were deleted; see recovery below.
+- Cancellation and three-minute callback timeout, bounded HTTP/stream waits, listener cleanup. Switching apps does not cancel login by itself. Android process death discards an unfinished authorization; retry from the app. No foreground service or background execution guarantee.
+- Settings: disconnected/connecting/connected/error, validated account label, available-scope explanation, connect/reconnect/disconnect, account model discovery and a diagnostic result area.
+- Model discovery uses the documented `models` array, eligible `visibility: list` entries in server order. No model name is assumed. One explicit button sends the requested Russian cathedral prompt to public `/v1/responses`, with an input array, `stream:true`, `store:false`. No production historical generation.
+- SSE handles split UTF-8/network chunks, multiple data lines, deltas and safe errors. Only a valid `response.completed` with completed status and output text marks success. Failed/incomplete/EOF/[DONE] alone never succeeds. Partial text remains visibly unconfirmed.
+
+## Automated evidence
+
+Local toolchain: Flutter 3.47.7 / Dart 3.13.5 on Windows. Tests use synthetic identities, ephemeral test signing keys and mocked HTTP; no owner's account, token or paid key is used.
+
+Checks run: formatting (20 files, no changes), `flutter analyze` (no issues), `flutter test` (**51 passed**). Coverage includes the RFC7636 PKCE vector, secure-value shape/uniqueness, callback origin/state/client/duplicates, denied login, nonce and other signed-claim failures, invalid signature, unusable token responses, failed exchange, cancel/timeout, serialized operations, refresh rotation and failed persistence, scope restrictions, local logout despite failed revocation, independent account state, streamed responses and HTTP failures, missing completion, account UI/logout, 320px/200% text, and original offline regression tests. A real local loopback socket test verifies listener/path behavior on the test host; it is **not an Android browser test**.
+
+Android SDK is absent locally. The existing GitHub Actions workflow runs formatting, analysis, tests and `flutter build apk --debug`, then uploads `guide-ryadom-m1-debug` only on success. Build evidence and exact run link will be recorded after completion. Compilation does not prove live authorization or Keystore operation on a physical phone.
+
+## Owner's installation and acceptance checklist
+
+1. Open [workflow runs](https://github.com/sergeywebgl/guide-ryadom/actions/workflows/flutter.yml). Select the successful M1 run, download `guide-ryadom-m1-debug`, unzip, and install `app-debug.apk` (version 1.1.0+2). This is a debug APK. CI debug signing can differ between runs: if Android rejects an update because signatures differ, uninstall the old debug app first. Uninstalling clears local credentials, mappings and host ID; for an already connected M1 build, disconnect first, or revoke access in ChatGPT settings. Do not uninstall merely because OAuth fails.
+2. Record phone model, Android version and system-browser name/version. Launch in airplane mode and check the three-stop offline demo, More, Next, Back and Settings. Sign-in is optional.
+3. Enable internet. Open **Настройки → Аккаунт ChatGPT · M1 → Подключить ChatGPT**. The system browser should show the official OpenAI sign-in/consent flow for Guide Ryadom. Choose that phone owner's eligible ChatGPT Plus account. Confirm the plan-sharing permission in the official consent screen. No API key should be requested by the app.
+4. After consent, the loopback page says to return to the app. Use Android's app switcher. Check **Подключён**, the expected account label and the model list. If the browser returns without a callback, wait at most three minutes or tap **Отменить**, then retry. Do not copy the callback URL or tokens into chat/logs.
+5. Select one of the discovered models (first is selected automatically) and tap **Отправить тестовый запрос**. The prompt is: «Расскажи один интересный и общеизвестный факт о Питерборском соборе в двух предложениях.» Wait for **Ответ завершён · response.completed** and generated text. Partial text, an error, or a closed browser is not success. The fact is not source-validated; this is only a connectivity test.
+6. Test cancellation/denied consent; browser Back without consent; switching apps and short backgrounding during login; airplane mode during login and during a request; quota/permission errors if naturally encountered. Never consume quota intentionally just to provoke an error. Confirm no failed request is marked completed and the offline tour still works.
+7. Close/reopen the process after successful login. Verify stored identity returns, load models and repeat the explicit request. Later, after the access token expires, check refresh. A failed/interrupted refresh may require sign-in again by design. Do not change the device clock to simulate expiry.
+8. Tap **Отключить аккаунт**. Check disconnected state, no old diagnostic text, and sign-in required for GPT. Relaunch and verify credentials do not return. If server revocation was not confirmed, remove this application's access in ChatGPT settings; the app provides a Usage link to copy. If secure storage reports a failure, persistent deletion is not confirmed: revoke remotely and clear this app's Android storage before retrying.
+9. Repeat independently on phone two with its owner's account. Verify signing out on one phone leaves the other connected. No credential export or copying between phones.
+
+Report only: device/browser versions, exact step, sanitized visible error, whether completed response appeared, and logout result. Do not send passwords, authorization URLs/codes, access/refresh/ID tokens or full network dumps.
+
+## Acceptance record
+
+| Requirement | Evidence |
+| --- | --- |
+| Android compilation/APK | Pending M1 CI result at initial commit |
+| Offline demo | M0 owner smoke test confirmed; M1 automated regression passes; M1 device regression pending |
+| Browser initiation and loopback result on Android | Pending owner |
+| Real token/identity/scope validation | Mocks pass; live account pending owner |
+| Eligible model and completed streamed GPT response | Mocks pass; live account pending owner |
+| Result visible in app, cancellation and logout | Widget/service tests pass; physical device pending owner |
+| Two-phone independence and Keystore persistence | Architecture/mocks only; physical devices pending owner |
+
+M2, real GPS, camera, audio, production historical narration and speculative prefetch are not part of this change.
