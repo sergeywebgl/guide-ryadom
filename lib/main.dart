@@ -6,6 +6,7 @@ import 'infrastructure/demo_adapters.dart';
 import 'features/auth_controller.dart';
 import 'infrastructure/auth/auth_service.dart';
 import 'infrastructure/auth/android_auth.dart';
+import 'infrastructure/auth/foreground_gate.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,7 @@ void main() {
                 vault: AndroidAuthVault(),
                 browser: AndroidSystemBrowser(),
                 receiverFactory: LoopbackReceiver.new,
+                waitForForeground: waitForAndroidForeground,
               ),
             )
           : null,

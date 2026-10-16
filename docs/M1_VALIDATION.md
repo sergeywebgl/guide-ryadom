@@ -2,6 +2,16 @@
 
 ## Status and feasibility
 
+### M1.3 foreground exchange (1.1.3+5)
+
+Owner reports identical `M1.2 / exchange / network / socket / os=7` on home Wi-Fi and mobile data, with no VPN or filtering. The home-network hypothesis is not supported, and replacing the HTTP pool did not resolve the observed failure. Numeric Android resolver code 7 is associated with EAI_NODATA, but the diagnostic does not prove why name lookup failed.
+
+Inspection found that callback arrival immediately triggered token exchange while the system browser could still own the foreground. M1.3 waits for Flutter's `resumed` lifecycle state after callback validation and listener shutdown, before creating the fresh exchange client or sending the code. Return from the browser page to the app within one minute; waiting is cancellable and times out safely. The code is never automatically replayed. No foreground service, battery-exemption request, DNS override, hardcoded IP or certificate bypass was added.
+
+A service regression test failed before this wait was connected and passes afterward. Tests cover no token POST before resume, exactly one after resume, cancellation before resume with no POST, the actual Flutter lifecycle adapter (paused/hidden/inactive/resumed), timeout and listener cleanup. All 65 tests pass locally. This proves corrected sequencing, **not that background restrictions caused this phone's socket error**; physical authentication and inference remain pending.
+
+References: [Flutter lifecycle listener](https://api.flutter.dev/flutter/widgets/AppLifecycleListener-class.html), [Android background restrictions](https://developer.android.com/develop/background-work/background-tasks/bg-work-restrictions). Android documents that restricted apps may lose background network access; no such setting has been confirmed on the owner's device.
+
 ### M1.2 connection isolation (1.1.2+4)
 
 Build evidence: [successful run 38902996583](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38902996583), code commit `c61fc53408942a1e8d8bee032f9a5c9e99b7f682`. Formatting, analysis, 60 tests and Android debug build passed. Download `guide-ryadom-m1-debug` from this run. Owner device retry pending.

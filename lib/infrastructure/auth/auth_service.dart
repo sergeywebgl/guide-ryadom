@@ -52,6 +52,7 @@ class ChatGptAuthService implements AuthProvider {
     required this.vault,
     required this.browser,
     required this.receiverFactory,
+    required this.waitForForeground,
     http.Client Function()? clientFactory,
     this.loginTimeout = const Duration(minutes: 3),
     DateTime Function()? now,
@@ -60,6 +61,7 @@ class ChatGptAuthService implements AuthProvider {
   final AuthVault vault;
   final SystemBrowser browser;
   final CallbackReceiver Function() receiverFactory;
+  final Future<void> Function(Future<void> cancelled) waitForForeground;
   final http.Client Function() clientFactory;
   final Duration loginTimeout;
   final DateTime Function() now;
@@ -234,6 +236,9 @@ class ChatGptAuthService implements AuthProvider {
     _loginTimer?.cancel();
     _stage = AuthStage.cleanup;
     await receiver.close();
+    _check(epoch);
+    _stage = AuthStage.foreground;
+    await waitForForeground(_cancelSignal!.future);
     _check(epoch);
     // Consent can outlive the metadata connection or switch networks. Use a
     // new pool for the first and only code exchange; never retry a used code.

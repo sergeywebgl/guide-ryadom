@@ -1,5 +1,9 @@
 # Engineering decisions & open questions
 
+## M1.3 foreground-only start of token exchange
+
+Owner reproduced the same socket os=7 on Wi-Fi and mobile data, without VPN/filtering. M1.2 did not resolve it. Callback processing previously started exchange while the browser could still be foreground. Add a required foreground-wait dependency to AuthService, wired to Flutter lifecycle events in the Android app. Await resumed after validation, with cancellation and a one-minute timeout; only then send the code once. Tests prove sequencing and adapter cleanup. Actual device cause and resolution remain unconfirmed; do not blame home Wi-Fi or claim DNS configuration is at fault solely from errno.
+
 ## M1.2 connection isolation
 
 Actual owner diagnostic narrowed the failure to `exchange / network / socket`. Use a fresh HTTP client after the browser round trip so the one-time code exchange cannot reuse pre-consent pooled connections. A synthetic stale-client fault fails before and passes after this change; the actual device/network cause remains unconfirmed. Do not replay the code. Add numeric OS socket errors to the safe diagnostic only, retaining no addresses/messages. Validate on the owner's phone before claiming a fix.

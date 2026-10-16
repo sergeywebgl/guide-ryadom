@@ -66,9 +66,11 @@ class Harness {
     this.key, {
     this.autoCallback = true,
     this.timeout = const Duration(seconds: 2),
+    Future<void> Function(Future<void>)? waitForForeground,
   }) {
     service = ChatGptAuthService(
       vault: vault,
+      waitForForeground: waitForForeground ?? (_) async {},
       browser: Browser((uri) {
         authorization = uri;
         if (!opened.isCompleted) opened.complete();
@@ -282,7 +284,7 @@ void main() {
         await h.service.signIn();
         fail('Expected failure');
       } on AuthFailure catch (error) {
-        expect(error.diagnostic, 'M1.2 / exchange / network / socket / os=104');
+        expect(error.diagnostic, 'M1.3 / exchange / network / socket / os=104');
         expect(error.atStage(AuthStage.identity).osError, 104);
         expect(error.diagnostic, isNot(contains('SECRET')));
         expect(error.diagnostic, isNot(contains('12345')));
@@ -305,6 +307,54 @@ void main() {
       hasLength(1),
     );
   });
+
+  test(
+    'validated callback waits for foreground before any token request',
+    () async {
+      final entered = Completer<void>();
+      final resumed = Completer<void>();
+      final h = Harness(
+        key,
+        waitForForeground: (_) {
+          entered.complete();
+          return resumed.future;
+        },
+      );
+      addTearDown(h.service.dispose);
+      final login = h.service.signIn();
+      await entered.future.timeout(const Duration(seconds: 1));
+      expect(h.requests.where((r) => r.url.path.endsWith('/token')), isEmpty);
+      expect(h.service.account, isNull);
+      resumed.complete();
+      await login;
+      expect(
+        h.requests.where((r) => r.url.path.endsWith('/token')),
+        hasLength(1),
+      );
+      expect(h.service.account, isNotNull);
+    },
+  );
+
+  test(
+    'cancelling after callback before resume never exchanges the code',
+    () async {
+      final entered = Completer<void>();
+      final h = Harness(
+        key,
+        waitForForeground: (cancelled) {
+          entered.complete();
+          return cancelled.then((_) => throw const AuthFailure('cancelled'));
+        },
+      );
+      addTearDown(h.service.dispose);
+      final checked = expectLater(h.service.signIn(), fails('cancelled'));
+      await entered.future;
+      h.service.cancel();
+      await checked;
+      expect(h.requests.where((r) => r.url.path.endsWith('/token')), isEmpty);
+      expect(h.service.account, isNull);
+    },
+  );
 
   for (final invalid in <Map<String, dynamic>>[
     {'access_token': ''},

@@ -40,6 +40,7 @@ enum AuthStage {
   listener,
   browser,
   callback,
+  foreground,
   exchange,
   identity,
   jwks,
@@ -84,7 +85,7 @@ class AuthFailure implements Exception {
     osError: osError,
   );
   String get diagnostic =>
-      'M1.2 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}';
+      'M1.3 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}';
   String? get stageLabel => switch (stage) {
     AuthStage.restore => 'Чтение сохранённой сессии',
     AuthStage.host => 'Подготовка установки',
@@ -92,6 +93,7 @@ class AuthFailure implements Exception {
     AuthStage.listener => 'Запуск локального callback',
     AuthStage.browser => 'Открытие браузера',
     AuthStage.callback => 'Получение и проверка ответа браузера',
+    AuthStage.foreground => 'Ожидание возврата в приложение',
     AuthStage.exchange => 'Обмен кода на токены',
     AuthStage.identity => 'Проверка аккаунта и подписи',
     AuthStage.jwks => 'Загрузка ключей проверки подписи',

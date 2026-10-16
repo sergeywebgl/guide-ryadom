@@ -30,7 +30,7 @@ class _AccountSectionState extends State<AccountSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Аккаунт ChatGPT · M1.2',
+                'Аккаунт ChatGPT · M1.3',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -59,7 +59,7 @@ class _AccountSectionState extends State<AccountSection> {
                 const LinearProgressIndicator(),
                 if (c.state == AccountState.connecting)
                   const Text(
-                    'После ответа в браузере вернитесь сюда. Если callback не пришёл, отмените вход или дождитесь тайм-аута (3 минуты).',
+                    'После ответа в браузере вернитесь сюда: обмен кода начнётся только после возврата. Ожидание callback — до 3 минут, возврата — до 1 минуты.',
                   ),
                 TextButton(onPressed: c.cancel, child: const Text('Отменить')),
               ] else if (c.account == null) ...[
