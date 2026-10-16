@@ -113,6 +113,7 @@ class ChatGptAuthService implements AuthProvider {
       _loginTimer = null;
       try {
         client.close();
+        if (!identical(_client, client)) _client?.close();
         await _receiver?.close();
       } catch (error) {
         if (!failed) throw safeAuthFailure(error, AuthStage.cleanup);
@@ -234,6 +235,12 @@ class ChatGptAuthService implements AuthProvider {
     _stage = AuthStage.cleanup;
     await receiver.close();
     _check(epoch);
+    // Consent can outlive the metadata connection or switch networks. Use a
+    // new pool for the first and only code exchange; never retry a used code.
+    _client?.close();
+    final exchangeClient = clientFactory();
+    _client = exchangeClient;
+    transport = OpenAiTransport(exchangeClient);
     Map<String, dynamic> tokens;
     _stage = AuthStage.exchange;
     try {

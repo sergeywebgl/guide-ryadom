@@ -2,6 +2,14 @@
 
 ## Status and feasibility
 
+### M1.2 connection isolation (1.1.2+4)
+
+Owner supplied the actual M1.1 diagnostic: `exchange / network / socket`. Callback validation and listener shutdown were therefore reached; no completed token exchange is established. A socket exception alone does not identify DNS, reset, connectivity policy or reuse of an old connection.
+
+The first hypothesis under test is reuse of the pre-browser metadata client's connections after consent/backgrounding. [Dart documents persistent connection caching](https://api.dart.dev/dart-io/HttpClient-class.html). A fault-injection test modeled a socket failure when the same client was used before and after the browser round trip; it failed before the change and passes afterward. This is a synthetic regression, **not reproduction of the owner's actual network condition**.
+
+M1.2 closes that client and creates a fresh client/pool after validating the callback, before sending the code exactly once. Cancellation and final cleanup target the new client. Token endpoints, PKCE, TLS certificate verification and ID checks are unchanged. No automatic retry of authorization codes was added. Diagnostics now also include the numeric socket OS error when available, without its message, address, port or URL, to distinguish remaining network failures. Retry on the phone is required; this is a mitigation for a plausible cause, not a confirmed resolution of the owner's issue.
+
 ### M1.1 diagnostic follow-up (1.1.1+3)
 
 Owner observed successful browser consent and the loopback page “Ответ получен. Вернитесь в приложение…”, followed by the app's “Сетевая ошибка. Повторите позже.” without HTTP status. This confirms browser delivery to the listener on that attempt, **not** successful callback parameter validation, token exchange, storage or inference.

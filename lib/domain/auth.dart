@@ -64,15 +64,27 @@ enum AuthCause {
 }
 
 class AuthFailure implements Exception {
-  const AuthFailure(this.code, {this.status, this.stage, this.cause});
+  const AuthFailure(
+    this.code, {
+    this.status,
+    this.stage,
+    this.cause,
+    this.osError,
+  });
   final String code;
   final int? status;
   final AuthStage? stage;
   final AuthCause? cause;
-  AuthFailure atStage(AuthStage value) =>
-      AuthFailure(code, status: status, stage: stage ?? value, cause: cause);
+  final int? osError;
+  AuthFailure atStage(AuthStage value) => AuthFailure(
+    code,
+    status: status,
+    stage: stage ?? value,
+    cause: cause,
+    osError: osError,
+  );
   String get diagnostic =>
-      'M1.1 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}';
+      'M1.2 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}';
   String? get stageLabel => switch (stage) {
     AuthStage.restore => 'Чтение сохранённой сессии',
     AuthStage.host => 'Подготовка установки',

@@ -85,7 +85,21 @@ class Harness {
         }
       }),
       receiverFactory: () => receiver = Receiver(),
-      clientFactory: () => MockClient(handle),
+      clientFactory: () {
+        createdClients++;
+        var usedBeforeBrowser = false;
+        return MockClient((request) {
+          if (request.url.path.endsWith('openid-configuration')) {
+            usedBeforeBrowser = true;
+          }
+          if (rejectReusedConnection &&
+              usedBeforeBrowser &&
+              request.url.path.endsWith('/token')) {
+            throw const SocketException('simulated stale connection');
+          }
+          return handle(request);
+        });
+      },
       now: () => clock,
       loginTimeout: timeout,
     );
@@ -108,6 +122,8 @@ class Harness {
   int revokeStatus = 200;
   final requests = <http.Request>[];
   int refreshes = 0;
+  int createdClients = 0;
+  bool rejectReusedConnection = false;
 
   String signed([Map<String, dynamic> overrides = const {}]) {
     final builder = JsonWebSignatureBuilder()
@@ -251,6 +267,44 @@ void main() {
       );
     },
   );
+
+  test(
+    'socket diagnostics retain only numeric OS error, not message or address',
+    () async {
+      final h = Harness(key)
+        ..tokenFailure = const SocketException(
+          'SECRET host',
+          osError: OSError('SECRET details', 104),
+          port: 12345,
+        );
+      addTearDown(h.service.dispose);
+      try {
+        await h.service.signIn();
+        fail('Expected failure');
+      } on AuthFailure catch (error) {
+        expect(error.diagnostic, 'M1.2 / exchange / network / socket / os=104');
+        expect(error.atStage(AuthStage.identity).osError, 104);
+        expect(error.diagnostic, isNot(contains('SECRET')));
+        expect(error.diagnostic, isNot(contains('12345')));
+      }
+      expect(
+        h.requests.where((r) => r.url.path.endsWith('/token')),
+        hasLength(1),
+      );
+    },
+  );
+
+  test('exchange uses a fresh client after the browser round trip', () async {
+    final h = Harness(key)..rejectReusedConnection = true;
+    addTearDown(h.service.dispose);
+    await h.service.signIn();
+    expect(h.service.account, isNotNull);
+    expect(h.createdClients, 2);
+    expect(
+      h.requests.where((r) => r.url.path.endsWith('/token')),
+      hasLength(1),
+    );
+  });
 
   for (final invalid in <Map<String, dynamic>>[
     {'access_token': ''},

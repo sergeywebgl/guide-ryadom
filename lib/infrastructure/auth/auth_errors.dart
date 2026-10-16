@@ -22,5 +22,11 @@ AuthFailure safeAuthFailure(Object error, AuthStage stage) {
     PlatformException() => ('internal', AuthCause.platform),
     _ => ('internal', AuthCause.unknown),
   };
-  return AuthFailure(code, stage: stage, cause: cause);
+  return AuthFailure(
+    code,
+    stage: stage,
+    cause: cause,
+    // Numeric OS codes only: exclude message, address, port and URL.
+    osError: error is SocketException ? error.osError?.errorCode : null,
+  );
 }
