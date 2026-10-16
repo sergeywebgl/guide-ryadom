@@ -4,15 +4,11 @@ A voice-first, location-aware AI walking-tour guide. **Personal open-source prot
 
 **Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **The owner confirmed M1.3 sign-in and model discovery on one Android phone; completed subscription inference remains pending**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
 
-**M1.5 (1.1.5+7):** handles the owner-confirmed missing response Content-Type by validating actual SSE events. Real completed GPT inference remains pending. See [validation and phone checklist](docs/M1_VALIDATION.md).
+**M1.6 (1.1.6+8):** the owner received real text deltas in M1.5, but completion was not validated. M1.6 adds a detailed on-screen, copyable structural report: request/HTTP metadata, timings, byte and event counts, event history, terminal response shape and exact parser rejection. Credentials and raw payloads are excluded. No extra API requests or retries are added. Real completed inference remains pending.
 
 ## Run the app
 
-**Latest APK:** [M1.5 successful build 38948025291](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38948025291), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 81 tests and Android build passed. Install `app-debug.apk` and repeat the GPT test; physical completed inference is still pending.
-
-**M1.5 update (1.1.5+7):** the owner confirmed M1.4 received HTTP 200 without Content-Type. Headerless responses now go through strict SSE validation instead of being rejected before reading. A valid completed event is still mandatory; empty/JSON/HTML/partial responses fail safely. Local formatting, analysis and 81 tests pass. Real inference on the phone remains pending; see [M1 validation](docs/M1_VALIDATION.md).
-
-**Previous APK:** [M1.4 successful build 38946779879](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38946779879), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 73 tests and Android debug build passed. Install `app-debug.apk`, confirm M1.4 in Settings and repeat the GPT test. A completed response on the phone is still pending.
+**Latest APK:** [M1.6 successful build 38950122061](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38950122061), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 84 tests and Android build passed. Install `app-debug.apk`, send one diagnostic request, then use **Копировать весь отчёт** below the result. The terminal failure on the phone is not yet diagnosed.
 
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 

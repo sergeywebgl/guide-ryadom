@@ -4,6 +4,8 @@
 
 ### M1.6 comprehensive response diagnostics (1.1.6+8)
 
+Build evidence: [successful run 38950122061](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38950122061), commit `937ae0aac255a4a68767fad351bc1c9e671b72ec`. Formatting, analysis, all 84 tests and Android debug build passed. Download `guide-ryadom-m1-debug`. Real-device report remains pending.
+
 Owner supplied M1.5 screenshots showing generated Russian text followed by `response / stream / HTTP 200 / media=missing`. This confirms receipt of text deltas, not validated completion. The previous one-code-per-build diagnostic approach was insufficient. No specific terminal-event cause is established by these screenshots.
 
 M1.6 adds a memory-only structural report below the GPT test, with **Копировать весь отчёт**. It records version, UTC start, elapsed timestamps, endpoint, selected model, request flags, HTTP status/content length/header count/media category, byte/chunk/event counts, first and recent event history, response status, ID presence (never ID value), output/content types and text lengths, allowlisted error codes, pending-frame count at EOF, exact validation rejection, and final UI result. First 10 and last 50 entries are retained; event counters include all parsed events. A pending JSON event at EOF is inspected for diagnostics only, never treated as completed inference.
