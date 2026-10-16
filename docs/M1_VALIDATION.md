@@ -4,6 +4,8 @@
 
 ### M1.4 response media type (1.1.4+6)
 
+Build evidence: [successful run 38946779879](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38946779879), code commit `25dac5c1c8b285f90b67de1b3cff28a3b643c672`. Formatting, analysis, all 73 tests and Android debug build passed. Download artifact `guide-ryadom-m1-debug`. Physical GPT retry remains pending.
+
 Owner screenshots confirm successful M1.3 authentication, the connected account, granted plan-use permission and model discovery on one Android phone. The explicit GPT test failed with `M1.3 / response / protocol`; no completed inference is confirmed. This supersedes the earlier pending-login records below. Persistence after restart, refresh, logout, cancellation and the second phone still need physical tests.
 
 Code inspection isolates that diagnostic at the response stage to the HTTP-200 Content-Type guard. The actual header/body from the phone is unavailable. Ranked hypotheses are a valid differently capitalized MIME type, a missing header, or a non-SSE response. A mocked HTTP-200 `Text/Event-Stream; charset=utf-8` reproduced the same rejection before the fix. This establishes a client defect, **not the actual live header or a confirmed fix on the phone**.
@@ -48,7 +50,7 @@ Local checks: formatting, analysis and 58 tests pass. The failing diagnostic reg
 
 M0 was installed and smoke-tested successfully on a real Android phone **according to the owner**. No additional M0 device tests are claimed.
 
-M1 code implements the documented flow. Android device authorization, callback delivery, secure-storage behavior and a real subscription-funded completed response are **pending owner testing on both phones**. Do not mark M1 technically complete until those checks pass.
+M1 code implements the documented flow. The owner has now confirmed M1.3 authorization, connected identity, plan permission and model discovery on one Android phone. A completed subscription-funded response, secure-storage persistence/refresh/logout and the second phone remain **pending owner testing**. Do not mark M1 technically complete until those checks pass.
 
 Official documentation reviewed on 16 October 2026:
 

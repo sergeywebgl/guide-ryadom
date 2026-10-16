@@ -8,6 +8,8 @@ A voice-first, location-aware AI walking-tour guide. **Personal open-source prot
 
 ## Run the app
 
+**Latest APK:** [M1.4 successful build 38946779879](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38946779879), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 73 tests and Android debug build passed. Install `app-debug.apk`, confirm M1.4 in Settings and repeat the GPT test. A completed response on the phone is still pending.
+
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 
 ```sh
