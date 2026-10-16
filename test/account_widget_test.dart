@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Ответ завершён · response.completed'), findsNothing);
     expect(find.text('Частичный ответ — успех не подтверждён'), findsOneWidget);
     expect(find.text('Этап: Получение ответа GPT'), findsOneWidget);
-    expect(find.text('Диагностика: M1.4 / response / stream'), findsOneWidget);
+    expect(find.text('Диагностика: M1.5 / response / stream'), findsOneWidget);
     expect(find.text('Копировать код ошибки'), findsOneWidget);
     await tester.ensureVisible(find.text('Отключить аккаунт'));
     await tester.tap(find.text('Отключить аккаунт'));

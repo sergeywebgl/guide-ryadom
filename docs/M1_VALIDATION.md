@@ -2,6 +2,16 @@
 
 ## Status and feasibility
 
+### M1.5 headerless streaming (1.1.5+7)
+
+Owner's M1.4 screenshot reports `response / response_format / HTTP 200 / media=missing`. This rules out MIME capitalization as the explanation for that attempt: the app saw no usable Content-Type. The rejected body was not read, so neither valid SSE nor empty/JSON/HTML content is established. Standard Dart HTTP is used, without a custom response-header adapter.
+
+A transport regression with HTTP 200, no Content-Type and valid SSE reproduced the observed rejection before the fix. M1.5 now reads a headerless response through the existing SSE parser; explicit incompatible media types remain rejected. This is client-side tolerance for absent metadata, not an alternate endpoint or authentication method. The official public Responses request is unchanged. Success still requires a valid `response.completed`, completed status, matching response ID when created was received, and nonempty assistant output. JSON-200 is never accepted as completion.
+
+Failures retain HTTP status and `media=missing`. Empty bodies report `stream_empty`; bodies without SSE data fields report `stream_no_events`; partial, failed, incomplete or malformed streams still fail. No raw body/header/token values are displayed or logged. Existing time/size limits apply. Tests cover valid headerless UTF-8 SSE and rejection of empty, JSON, HTML, partial, DONE-only, failed, incomplete and malformed bodies. Local formatting and all 81 tests pass; CI evidence follows after build.
+
+Install M1.5 using the signing caveat below. If still connected, send the test request once; otherwise sign in and return to the app first. Report completed text with **Ответ завершён · response.completed**, or copy the safe diagnostic. Headerless valid-SSE handling is verified with mocks; the actual phone body and real completed inference remain unverified. No need to change Wi-Fi settings. M2 remains out of scope.
+
 ### M1.4 response media type (1.1.4+6)
 
 Build evidence: [successful run 38946779879](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38946779879), code commit `25dac5c1c8b285f90b67de1b3cff28a3b643c672`. Formatting, analysis, all 73 tests and Android debug build passed. Download artifact `guide-ryadom-m1-debug`. Physical GPT retry remains pending.

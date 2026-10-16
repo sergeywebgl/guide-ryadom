@@ -240,7 +240,7 @@ class OpenAiTransport {
         .first
         .trim()
         .toLowerCase();
-    if (mediaType != 'text/event-stream') {
+    if (mediaType.isNotEmpty && mediaType != 'text/event-stream') {
       // Release the rejected stream. Never expose arbitrary header/body values.
       await response.stream.listen((_) {}).cancel();
       throw AuthFailure(
@@ -257,10 +257,24 @@ class OpenAiTransport {
         },
       );
     }
-    return parseResponseStream(
-      response.stream,
-      onPartial,
-    ).timeout(const Duration(seconds: 90));
+    // A missing MIME header is inconclusive. Validate the same documented SSE
+    // events, never reinterpret a JSON body or HTTP 200 alone as completion.
+    try {
+      return await parseResponseStream(
+        response.stream,
+        onPartial,
+      ).timeout(const Duration(seconds: 90));
+    } catch (error) {
+      final failure = safeAuthFailure(error, AuthStage.response);
+      throw AuthFailure(
+        failure.code,
+        status: response.statusCode,
+        stage: failure.stage,
+        cause: failure.cause,
+        osError: failure.osError,
+        media: mediaType.isEmpty ? ResponseMedia.missing : null,
+      );
+    }
   }
 }
 
@@ -293,6 +307,7 @@ Future<String> parseResponseStream(
   final data = <String>[];
   var text = '';
   var size = 0;
+  var sawData = false;
   String? responseId;
   await for (final line
       in bytes
@@ -302,6 +317,7 @@ Future<String> parseResponseStream(
     size += line.length;
     if (size > 512 * 1024) throw const AuthFailure('stream');
     if (line.startsWith('data:')) {
+      sawData = true;
       data.add(line.substring(5).replaceFirst(RegExp(r'^ '), ''));
     }
     if (line.isNotEmpty || data.isEmpty) continue;
@@ -363,5 +379,7 @@ Future<String> parseResponseStream(
       return result.toString();
     }
   }
+  if (size == 0) throw const AuthFailure('stream_empty');
+  if (!sawData) throw const AuthFailure('stream_no_events');
   throw const AuthFailure('stream');
 }

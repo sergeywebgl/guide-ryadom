@@ -90,7 +90,7 @@ class AuthFailure implements Exception {
     media: media,
   );
   String get diagnostic =>
-      'M1.4 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
+      'M1.5 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
   String? get stageLabel => switch (stage) {
     AuthStage.restore => 'Чтение сохранённой сессии',
     AuthStage.host => 'Подготовка установки',
@@ -125,6 +125,8 @@ class AuthFailure implements Exception {
     'forbidden' =>
       'Доступ запрещён для этого аккаунта, региона или интеграции.',
     'stream' => 'Поток завершился без подтверждённого полного ответа.',
+    'stream_empty' => 'Сервис вернул пустой ответ. Ответ GPT не получен.',
+    'stream_no_events' => 'В ответе сервиса нет событий потока GPT.',
     'models' => 'Нет доступных моделей для проверки.',
     'storage' => 'Защищённое хранилище недоступно. Переподключите аккаунт.',
     'browser' => 'Не удалось открыть системный браузер.',

@@ -8,6 +8,8 @@ A voice-first, location-aware AI walking-tour guide. **Personal open-source prot
 
 ## Run the app
 
+**M1.5 update (1.1.5+7):** the owner confirmed M1.4 received HTTP 200 without Content-Type. Headerless responses now go through strict SSE validation instead of being rejected before reading. A valid completed event is still mandatory; empty/JSON/HTML/partial responses fail safely. Local formatting, analysis and 81 tests pass. Real inference on the phone remains pending; see [M1 validation](docs/M1_VALIDATION.md).
+
 **Latest APK:** [M1.4 successful build 38946779879](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38946779879), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 73 tests and Android debug build passed. Install `app-debug.apk`, confirm M1.4 in Settings and repeat the GPT test. A completed response on the phone is still pending.
 
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.

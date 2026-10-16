@@ -32,8 +32,56 @@ Stream<List<int>> chunks(String value) =>
     Stream.fromIterable(utf8.encode(value).map((b) => [b]));
 
 void main() {
+  for (final entry in <String, String>{
+    '': 'stream_empty',
+    jsonEncode(completed()): 'stream_no_events',
+    '<html>SECRET</html>': 'stream_no_events',
+    frame({'type': 'response.output_text.delta', 'delta': 'partial'}): 'stream',
+    'data: [DONE]\n\n': 'stream',
+    frame({'type': 'response.failed'}): 'stream',
+    frame({'type': 'response.incomplete'}): 'stream',
+    'data: malformed\n\n': 'stream',
+  }.entries) {
+    test(
+      'headerless body never succeeds without completion: ${entry.key}',
+      () async {
+        final transport = OpenAiTransport(
+          MockClient.streaming(
+            (_, _) async => http.StreamedResponse(chunks(entry.key), 200),
+          ),
+        );
+        await expectLater(
+          transport.probe('mock', 'model', (_) {}),
+          throwsA(
+            isA<AuthFailure>()
+                .having((e) => e.code, 'code', entry.value)
+                .having((e) => e.media, 'media', ResponseMedia.missing)
+                .having((e) => e.status, 'status', 200)
+                .having(
+                  (e) => e.diagnostic,
+                  'safe diagnostic',
+                  isNot(contains('SECRET')),
+                ),
+          ),
+        );
+      },
+    );
+  }
+
+  test(
+    'HTTP 200 without Content-Type validates actual SSE completion',
+    () async {
+      final transport = OpenAiTransport(
+        MockClient.streaming(
+          (_, _) async =>
+              http.StreamedResponse(chunks(frame(completed())), 200),
+        ),
+      );
+      expect(await transport.probe('mock', 'model', (_) {}), 'Факт о соборе.');
+    },
+  );
+
   for (final entry in <String, ResponseMedia>{
-    '': ResponseMedia.missing,
     'application/json': ResponseMedia.json,
     'application/problem+json; charset=utf-8': ResponseMedia.json,
     'text/html': ResponseMedia.html,
@@ -73,7 +121,7 @@ void main() {
         expect(failure.media, entry.value);
         expect(
           failure.diagnostic,
-          'M1.4 / response / response_format / HTTP 200 / media=${entry.value.name}',
+          'M1.5 / response / response_format / HTTP 200 / media=${entry.value.name}',
         );
         expect(failure.diagnostic, isNot(contains('TOKEN')));
         expect(cancelled, isTrue);

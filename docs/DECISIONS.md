@@ -1,5 +1,9 @@
 # Engineering decisions & open questions
 
+## M1.5 — validate headerless Responses bodies
+
+Observed M1.4 HTTP 200/media=missing confirms the premature Content-Type rejection but not the body format. Accept an absent header only by parsing the same documented SSE events and requiring valid completed output. Explicit incompatible types remain errors; JSON is never a success fallback. A failing transport regression with a headerless valid SSE body passes after this change. Add safe empty/no-event distinctions and retain status/media on parser errors. Actual inference on the phone still requires owner confirmation. See M1_VALIDATION.md and the official models-and-inference reference there.
+
 ## M1.3 foreground-only start of token exchange
 
 Owner reproduced the same socket os=7 on Wi-Fi and mobile data, without VPN/filtering. M1.2 did not resolve it. Callback processing previously started exchange while the browser could still be foreground. Add a required foreground-wait dependency to AuthService, wired to Flutter lifecycle events in the Android app. Await resumed after validation, with cancellation and a one-minute timeout; only then send the code once. Tests prove sequencing and adapter cleanup. Actual device cause and resolution remain unconfirmed; do not blame home Wi-Fi or claim DNS configuration is at fault solely from errno.
