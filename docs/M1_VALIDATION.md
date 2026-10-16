@@ -2,6 +2,18 @@
 
 ## Status and feasibility
 
+### M1.4 response media type (1.1.4+6)
+
+Owner screenshots confirm successful M1.3 authentication, the connected account, granted plan-use permission and model discovery on one Android phone. The explicit GPT test failed with `M1.3 / response / protocol`; no completed inference is confirmed. This supersedes the earlier pending-login records below. Persistence after restart, refresh, logout, cancellation and the second phone still need physical tests.
+
+Code inspection isolates that diagnostic at the response stage to the HTTP-200 Content-Type guard. The actual header/body from the phone is unavailable. Ranked hypotheses are a valid differently capitalized MIME type, a missing header, or a non-SSE response. A mocked HTTP-200 `Text/Event-Stream; charset=utf-8` reproduced the same rejection before the fix. This establishes a client defect, **not the actual live header or a confirmed fix on the phone**.
+
+M1.4 compares the normalized exact media type, accepting case variations/parameters and rejecting false prefixes. Unexpected streams are cancelled and reported as `response_format / HTTP 200 / media=...`, where media is a closed enum (missing/json/html/text/binary/other). Raw headers, bodies and credentials never enter diagnostics. JSON/HTML responses are not reinterpreted as successful GPT output. The public endpoint/request and requirement for valid streamed `response.completed` are unchanged; see [official inference contract](https://developers.openai.com/siwc/token-sharing-open-source/models-and-inference).
+
+Regression tests cover valid mixed-case SSE, unexpected/missing media types, stream cancellation and safe diagnostics, including a completed-looking JSON body which must fail. Existing partial/failed/incomplete/missing-completion tests remain in place. Build evidence is recorded after CI below.
+
+Install the M1.4 APK using the signing caveat in the checklist below. Confirm the Settings heading says M1.4. If the account remains connected, select a discovered model and tap **Отправить тестовый запрос** once; otherwise sign in and return to the app first. Report either **Ответ завершён · response.completed** with visible text, or the entire safe **Копировать код ошибки** value. Do not send network dumps or callback URLs. M1 remains incomplete until real completed inference is confirmed.
+
 ### M1.3 foreground exchange (1.1.3+5)
 
 Build evidence: [successful run 38904887835](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38904887835), code commit `94d66e4e692a35bdf27f4d1ffdaec5303df72414`. Formatting, analysis, 65 tests and Android debug build passed. Artifact: `guide-ryadom-m1-debug`. Physical retry pending.
@@ -100,9 +112,9 @@ Report only: device/browser versions, exact step, sanitized visible error, wheth
 | --- | --- |
 | Android compilation/APK | Passed in run 38898910026, artifact guide-ryadom-m1-debug |
 | Offline demo | M0 owner smoke test confirmed; M1 automated regression passes; M1 device regression pending |
-| Browser initiation and loopback result on Android | Owner reached consent and the callback return page on one phone; subsequent sign-in failed; second phone pending |
-| Real token/identity/scope validation | Mocks pass; live account pending owner |
-| Eligible model and completed streamed GPT response | Mocks pass; live account pending owner |
+| Browser initiation and loopback result on Android | Owner confirmed successful M1.3 login on one phone; second phone pending |
+| Real token/identity/scope validation | Owner confirmed connected account and plan permission in M1.3 on one phone; persistence/refresh pending |
+| Eligible model and completed streamed GPT response | Owner confirmed model discovery; response-format error on GPT test, completed inference pending |
 | Result visible in app, cancellation and logout | Widget/service tests pass; physical device pending owner |
 | Two-phone independence and Keystore persistence | Architecture/mocks only; physical devices pending owner |
 

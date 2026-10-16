@@ -4,6 +4,10 @@
 
 Owner reproduced the same socket os=7 on Wi-Fi and mobile data, without VPN/filtering. M1.2 did not resolve it. Callback processing previously started exchange while the browser could still be foreground. Add a required foreground-wait dependency to AuthService, wired to Flutter lifecycle events in the Android app. Await resumed after validation, with cancellation and a one-minute timeout; only then send the code once. Tests prove sequencing and adapter cleanup. Actual device cause and resolution remain unconfirmed; do not blame home Wi-Fi or claim DNS configuration is at fault solely from errno.
 
+## M1.4 response-format validation
+
+Owner confirmed M1.3 sign-in and model discovery on one phone, followed by `response / protocol` during the explicit GPT test. Code narrows this to the HTTP-200 media-type guard; the live header is unknown. A synthetic mixed-case valid SSE header reproduced the rejection. Normalize the exact MIME type, cancel rejected streams, and expose only a closed media-category enum plus HTTP status. Keep valid `response.completed` mandatory; do not accept JSON-200 as successful streaming inference or introduce an alternate endpoint. Local format/analysis and 73 tests passed. Device resolution remains pending; see M1_VALIDATION.md.
+
 ## M1.2 connection isolation
 
 Actual owner diagnostic narrowed the failure to `exchange / network / socket`. Use a fresh HTTP client after the browser round trip so the one-time code exchange cannot reuse pre-consent pooled connections. A synthetic stale-client fault fails before and passes after this change; the actual device/network cause remains unconfirmed. Do not replay the code. Add numeric OS socket errors to the safe diagnostic only, retaining no addresses/messages. Validate on the owner's phone before claiming a fix.

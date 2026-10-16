@@ -2,9 +2,9 @@
 
 A voice-first, location-aware AI walking-tour guide. **Personal open-source prototype** for two separate Android devices, each using its owner's ChatGPT Plus account, subject to account eligibility and current Sign in with ChatGPT restrictions.
 
-**Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **Real device authentication and subscription inference remain pending owner validation**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
+**Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **The owner confirmed M1.3 sign-in and model discovery on one Android phone; completed subscription inference remains pending**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
 
-**Latest APK — M1.3 (1.1.3+5):** [successful build 38904887835](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38904887835), artifact `guide-ryadom-m1-debug`. M1.2 still failed with `exchange / network / socket / os=7` on both Wi-Fi and mobile data. M1.3 waits until the app resumes before exchanging the code: after browser consent, return to the app within one minute and leave it open. Formatting, analysis, 65 tests and Android build passed. Actual device resolution remains unconfirmed; use **Копировать код ошибки** if it fails. No tokens or authorization URLs are included.
+**M1.4 (1.1.4+6):** fixes case-sensitive streaming media-type validation and adds safe format diagnostics. The owner confirmed M1.3 authentication/model discovery, but the GPT test failed at the response-format check. The exact live response header is unknown; M1.4 is not yet a confirmed device fix. See [validation and installation checklist](docs/M1_VALIDATION.md).
 
 ## Run the app
 

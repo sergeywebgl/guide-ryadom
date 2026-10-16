@@ -234,10 +234,28 @@ class OpenAiTransport {
       await response.stream.listen((_) {}).cancel();
       throw httpFailure(response.statusCode);
     }
-    if (!(response.headers['content-type'] ?? '').startsWith(
-      'text/event-stream',
-    )) {
-      throw const AuthFailure('protocol');
+    // MIME type/subtype are case insensitive; parameters are not the type.
+    final mediaType = (response.headers['content-type'] ?? '')
+        .split(';')
+        .first
+        .trim()
+        .toLowerCase();
+    if (mediaType != 'text/event-stream') {
+      // Release the rejected stream. Never expose arbitrary header/body values.
+      await response.stream.listen((_) {}).cancel();
+      throw AuthFailure(
+        'response_format',
+        status: response.statusCode,
+        media: switch (mediaType) {
+          '' => ResponseMedia.missing,
+          'application/json' ||
+          'application/problem+json' => ResponseMedia.json,
+          'text/html' => ResponseMedia.html,
+          'text/plain' => ResponseMedia.text,
+          'application/octet-stream' => ResponseMedia.binary,
+          _ => ResponseMedia.other,
+        },
+      );
     }
     return parseResponseStream(
       response.stream,

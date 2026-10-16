@@ -30,7 +30,7 @@ class _AccountSectionState extends State<AccountSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Аккаунт ChatGPT · M1.3',
+                'Аккаунт ChatGPT · M1.4',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),

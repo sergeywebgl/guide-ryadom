@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +32,70 @@ Stream<List<int>> chunks(String value) =>
     Stream.fromIterable(utf8.encode(value).map((b) => [b]));
 
 void main() {
+  for (final entry in <String, ResponseMedia>{
+    '': ResponseMedia.missing,
+    'application/json': ResponseMedia.json,
+    'application/problem+json; charset=utf-8': ResponseMedia.json,
+    'text/html': ResponseMedia.html,
+    'text/plain': ResponseMedia.text,
+    'application/octet-stream': ResponseMedia.binary,
+    'text/event-stream-invalid; secret=TOKEN': ResponseMedia.other,
+  }.entries) {
+    test('unexpected media ${entry.value.name} is safe and cancels body', () async {
+      var cancelled = false;
+      final body = StreamController<List<int>>(
+        onCancel: () {
+          cancelled = true;
+        },
+      );
+      final transport = OpenAiTransport(
+        MockClient.streaming(
+          (_, _) async => http.StreamedResponse(
+            body.stream,
+            200,
+            headers: {if (entry.key.isNotEmpty) 'content-type': entry.key},
+          ),
+        ),
+      );
+      // Even completed-looking JSON or SSE must not bypass the format check.
+      body.add(utf8.encode(jsonEncode(completed())));
+      try {
+        await transport.probe(
+          'mock',
+          'model',
+          (_) => fail('No partial expected'),
+        );
+        fail('Unexpected format must fail');
+      } on AuthFailure catch (error) {
+        final failure = error.atStage(AuthStage.response);
+        expect(failure.code, 'response_format');
+        expect(failure.status, 200);
+        expect(failure.media, entry.value);
+        expect(
+          failure.diagnostic,
+          'M1.4 / response / response_format / HTTP 200 / media=${entry.value.name}',
+        );
+        expect(failure.diagnostic, isNot(contains('TOKEN')));
+        expect(cancelled, isTrue);
+      } finally {
+        await body.close();
+      }
+    });
+  }
+
+  test('valid MIME type is case insensitive and permits parameters', () async {
+    final transport = OpenAiTransport(
+      MockClient(
+        (_) async => http.Response(
+          frame(completed()),
+          200,
+          headers: {'content-type': 'Text/Event-Stream; charset=utf-8'},
+        ),
+      ),
+    );
+    expect(await transport.probe('mock', 'model', (_) {}), 'Факт о соборе.');
+  });
+
   test('SSE byte boundaries, UTF8, comments and multiline data; completed text authoritative', () async {
     final partials = <String>[];
     final data =

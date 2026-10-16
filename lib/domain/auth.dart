@@ -64,6 +64,8 @@ enum AuthCause {
   unknown,
 }
 
+enum ResponseMedia { missing, json, html, text, binary, other }
+
 class AuthFailure implements Exception {
   const AuthFailure(
     this.code, {
@@ -71,21 +73,24 @@ class AuthFailure implements Exception {
     this.stage,
     this.cause,
     this.osError,
+    this.media,
   });
   final String code;
   final int? status;
   final AuthStage? stage;
   final AuthCause? cause;
   final int? osError;
+  final ResponseMedia? media;
   AuthFailure atStage(AuthStage value) => AuthFailure(
     code,
     status: status,
     stage: stage ?? value,
     cause: cause,
     osError: osError,
+    media: media,
   );
   String get diagnostic =>
-      'M1.3 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}';
+      'M1.4 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
   String? get stageLabel => switch (stage) {
     AuthStage.restore => 'Чтение сохранённой сессии',
     AuthStage.host => 'Подготовка установки',
@@ -126,6 +131,7 @@ class AuthFailure implements Exception {
     'loopback' => 'Не удалось запустить официальный локальный callback.',
     'busy' => 'Дождитесь завершения текущей операции.',
     'protocol' => 'Ответ сервиса не соответствует официальному контракту.',
+    'response_format' => 'Сервис вернул неожиданный формат вместо потока GPT. Передайте код диагностики разработчику.',
     'internal' =>
       'Внутренняя ошибка приложения. Передайте код диагностики разработчику.',
     'tls' => 'Не удалось установить защищённое соединение с OpenAI.',
