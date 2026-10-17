@@ -4,11 +4,11 @@ A voice-first, location-aware AI walking-tour guide. **Personal open-source prot
 
 **Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **The owner confirmed M1.3 sign-in and model discovery on one Android phone; completed subscription inference remains pending**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
 
-**M1.6 (1.1.6+8):** the owner received real text deltas in M1.5, but completion was not validated. M1.6 adds a detailed on-screen, copyable structural report: request/HTTP metadata, timings, byte and event counts, event history, terminal response shape and exact parser rejection. Credentials and raw payloads are excluded. No extra API requests or retries are added. Real completed inference remains pending.
+**M1.7 (1.1.7+9):** fixes the confirmed client rejection of valid completed inference with an empty final output list. Text received in deltas is retained after validated completion. The detailed diagnostic report remains available. The owner's M1.6 report confirms the server sent completed inference; corrected app UI acceptance on the phone remains pending.
 
 ## Run the app
 
-**Latest APK:** [M1.6 successful build 38950122061](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38950122061), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 84 tests and Android build passed. Install `app-debug.apk`, send one diagnostic request, then use **Копировать весь отчёт** below the result. The terminal failure on the phone is not yet diagnosed.
+**Latest APK:** [M1.7 successful build 39065529616](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39065529616), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 92 tests and Android build passed. Install `app-debug.apk`, run one test and confirm **Ответ завершён · response.completed**. Detailed diagnostics remain available if needed.
 
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 
