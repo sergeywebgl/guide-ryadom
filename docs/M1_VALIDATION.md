@@ -2,6 +2,14 @@
 
 ## Status and feasibility
 
+### M1.7 completed response with streamed text (1.1.7+9)
+
+The owner's M1.6 report establishes the actual failure: 56 text deltas arrived, followed by `response.completed` with completed status and an empty output list. The parser rejected it as `completed_no_assistant_text`. This was a client assumption that the final event must repeat the streamed text, not a failed authorization or absent terminal event.
+
+M1.7 uses the accumulated text deltas when a validated completed response has `output: []`. Nonempty final output remains authoritative; texts are never concatenated twice. Status, response ID matching, output-list shape and nonempty result checks remain enforced. Missing completion, failed/incomplete events and malformed output still fail. This follows the [official SIWC example](https://developers.openai.com/siwc/token-sharing-open-source/models-and-inference), which consumes text deltas and separately waits for completion.
+
+A synthetic regression matching the reported event shape failed before the fix and passes afterward. Seven negative cases verify that this change cannot bypass completion validation. All 92 tests passed locally; device acceptance of the corrected UI remains pending. Diagnostics are retained and now record `result_source=streamed_text` or `completed_output`. Install M1.7 and run one test: expect the generated text and **Ответ завершён · response.completed**. No M2 work is included.
+
 ### M1.6 comprehensive response diagnostics (1.1.6+8)
 
 Build evidence: [successful run 38950122061](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38950122061), commit `937ae0aac255a4a68767fad351bc1c9e671b72ec`. Formatting, analysis, all 84 tests and Android debug build passed. Download `guide-ryadom-m1-debug`. Real-device report remains pending.

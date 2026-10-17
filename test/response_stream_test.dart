@@ -33,6 +33,90 @@ Stream<List<int>> chunks(String value) =>
     Stream.fromIterable(utf8.encode(value).map((b) => [b]));
 
 void main() {
+  for (final variant in [
+    'no_text',
+    'wrong_id',
+    'wrong_status',
+    'missing_output',
+    'nonempty_nontext_output',
+    'failed',
+    'incomplete',
+  ]) {
+    test(
+      'empty-output completion does not bypass validation: $variant',
+      () async {
+        final terminal = <String, dynamic>{
+          'type': 'response.completed',
+          'response': <String, dynamic>{
+            'id': 'r1',
+            'status': 'completed',
+            'output': [],
+          },
+        };
+        final response = terminal['response'] as Map<String, dynamic>;
+        if (variant == 'wrong_id') response['id'] = 'r2';
+        if (variant == 'wrong_status') response['status'] = 'in_progress';
+        if (variant == 'missing_output') response.remove('output');
+        if (variant == 'nonempty_nontext_output') {
+          response['output'] = [
+            {'type': 'reasoning'},
+          ];
+        }
+        if (variant == 'failed' || variant == 'incomplete') {
+          terminal['type'] = 'response.$variant';
+        }
+        final data =
+            frame({
+              'type': 'response.created',
+              'response': {'id': 'r1'},
+            }) +
+            (variant == 'no_text'
+                ? ''
+                : frame({
+                    'type': 'response.output_text.delta',
+                    'delta': 'text',
+                  })) +
+            frame(terminal);
+        await expectLater(
+          parseResponseStream(chunks(data), (_) {}),
+          throwsA(isA<AuthFailure>()),
+        );
+      },
+    );
+  }
+
+  test(
+    'owner trace: streamed text then completed with empty output succeeds',
+    () async {
+      final trace = ProbeTrace();
+      final data =
+          frame({
+            'type': 'response.created',
+            'response': {'id': 'r1'},
+          }) +
+          frame({'type': 'response.output_text.delta', 'delta': 'Факт '}) +
+          frame({'type': 'response.output_text.delta', 'delta': 'о соборе.'}) +
+          frame({
+            'type': 'response.output_text.done',
+            'text': 'Факт о соборе.',
+          }) +
+          frame({
+            'type': 'response.completed',
+            'response': {'id': 'r1', 'status': 'completed', 'output': []},
+          });
+      final transport = OpenAiTransport(
+        MockClient.streaming(
+          (_, _) async => http.StreamedResponse(chunks(data), 200),
+        ),
+      );
+      expect(
+        await transport.probe('mock', 'model', (_) {}, trace: trace),
+        'Факт о соборе.',
+      );
+      expect(trace.report, contains('validated_completion'));
+    },
+  );
+
   test(
     'trace identifies malformed completion and omits all payload secrets',
     () async {
@@ -188,7 +272,7 @@ void main() {
         expect(failure.media, entry.value);
         expect(
           failure.diagnostic,
-          'M1.6 / response / response_format / HTTP 200 / media=${entry.value.name}',
+          'M1.7 / response / response_format / HTTP 200 / media=${entry.value.name}',
         );
         expect(failure.diagnostic, isNot(contains('TOKEN')));
         expect(cancelled, isTrue);

@@ -399,6 +399,14 @@ Future<String> parseResponseStream(
           }
         }
       }
+      // SIWC can send the text exclusively through delta events and complete
+      // with output: []. Completion still must pass every check above.
+      if ((response['output'] as List).isEmpty && text.isNotEmpty) {
+        result.write(text);
+        trace?.note('result_source=streamed_text');
+      } else {
+        trace?.note('result_source=completed_output');
+      }
       if (result.isEmpty) reject('completed_no_assistant_text');
       trace?.note('validated_completion text_characters=${result.length}');
       return result.toString();

@@ -1,5 +1,9 @@
 # Engineering decisions & open questions
 
+## M1.7 — use streamed text after valid empty-output completion
+
+Owner's M1.6 trace confirms successful terminal inference with `output: []` after text deltas; our final-output-only assumption rejected it. Use accumulated deltas only when the validated final output list is empty. Preserve final-output precedence, terminal status and ID checks, and failure handling. Regression reproduced the exact structural rejection before the fix; 92 tests pass after it. Corrected device UI acceptance remains pending.
+
 ## M1.6 — diagnose completion in one report
 
 Owner received text deltas in M1.5 but no accepted completion. Replace incremental short-code diagnosis with bounded structural tracing through transport, SSE parser and UI. Expose event counts/history, timings, terminal response shape and exact rejection without raw bodies, credentials or account data. Trace is optional through the provider boundary and memory-only. Do not infer completion from fluent text or relax terminal validation without evidence. Tests cover malformed completion, pending EOF frame, bounded/redacted history and UI cleanup; device report is still required.

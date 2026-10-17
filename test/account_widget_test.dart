@@ -81,7 +81,7 @@ void main() {
     expect(find.text('Ответ завершён · response.completed'), findsNothing);
     expect(find.text('Частичный ответ — успех не подтверждён'), findsOneWidget);
     expect(find.text('Этап: Получение ответа GPT'), findsOneWidget);
-    expect(find.text('Диагностика: M1.6 / response / stream'), findsOneWidget);
+    expect(find.text('Диагностика: M1.7 / response / stream'), findsOneWidget);
     expect(find.text('Копировать код ошибки'), findsOneWidget);
     expect(find.text('Копировать весь отчёт'), findsOneWidget);
     expect(c.trace!.report, contains('UI completed=false'));

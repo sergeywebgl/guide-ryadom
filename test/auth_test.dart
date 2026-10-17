@@ -284,7 +284,7 @@ void main() {
         await h.service.signIn();
         fail('Expected failure');
       } on AuthFailure catch (error) {
-        expect(error.diagnostic, 'M1.6 / exchange / network / socket / os=104');
+        expect(error.diagnostic, 'M1.7 / exchange / network / socket / os=104');
         expect(error.atStage(AuthStage.identity).osError, 104);
         expect(error.diagnostic, isNot(contains('SECRET')));
         expect(error.diagnostic, isNot(contains('12345')));
