@@ -1,5 +1,9 @@
 # Engineering decisions & open questions
 
+## M2.0 — explicit stories from a small evidence packet
+
+Owner tentatively confirmed M1 and authorized continuing on 19 October 2026. Implement one cathedral stop with seven reviewed facts and a versioned narration port. Reuse the authenticated streaming transport; prompt for JSON and validate locally rather than assuming preview schema-format support. Three fixed fact groups guarantee ID novelty; semantic faithfulness remains a manual acceptance check, explicitly disclosed in UI. Display stories only after completion/validation, consume IDs on display, never on failed/cancelled generation. Account changes and page exit discard local history. No persistence/prefetch or new location permissions. See M2_VALIDATION.md for sources, checks and limitations.
+
 ## M1.7 — use streamed text after valid empty-output completion
 
 Owner's M1.6 trace confirms successful terminal inference with `output: []` after text deltas; our final-output-only assumption rejected it. Use accumulated deltas only when the validated final output list is empty. Preserve final-output precedence, terminal status and ID checks, and failure handling. Regression reproduced the exact structural rejection before the fix; 92 tests pass after it. Corrected device UI acceptance remains pending.

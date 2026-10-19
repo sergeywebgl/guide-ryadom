@@ -96,7 +96,7 @@ class AuthFailure implements Exception {
     media: media,
   );
   String get diagnostic =>
-      'M1.7 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
+      'M2.0 / ${stage?.name ?? 'unknown'} / $code${cause == null ? '' : ' / ${cause!.name}'}${status == null ? '' : ' / HTTP $status'}${osError == null ? '' : ' / os=$osError'}${media == null ? '' : ' / media=${media!.name}'}';
   String? get stageLabel => switch (stage) {
     AuthStage.restore => 'Чтение сохранённой сессии',
     AuthStage.host => 'Подготовка установки',

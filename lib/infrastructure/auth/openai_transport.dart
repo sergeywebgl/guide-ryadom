@@ -215,6 +215,7 @@ class OpenAiTransport {
     String model,
     void Function(String) onPartial, {
     ProbeTrace? trace,
+    String prompt = diagnosticPrompt,
   }) async {
     trace?.note(
       'request_start model=${RegExp(r"^[a-zA-Z0-9._-]{1,80}$").hasMatch(model) ? model : "omitted"}',
@@ -228,7 +229,7 @@ class OpenAiTransport {
       ..body = jsonEncode({
         'model': model,
         'input': [
-          {'role': 'user', 'content': diagnosticPrompt},
+          {'role': 'user', 'content': prompt},
         ],
         'store': false,
         'stream': true,

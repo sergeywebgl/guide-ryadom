@@ -6,6 +6,7 @@ import '../domain/tour.dart';
 import '../features/tour_controller.dart';
 import '../features/auth_controller.dart';
 import '../features/account_section.dart';
+import '../features/narrative_page.dart';
 
 const _ink = Color(0xFF233E38);
 const _paper = Color(0xFFF7F3EB);
@@ -152,6 +153,16 @@ class _GuideHomeState extends State<_GuideHome> {
     }
 
     return [
+      if (widget.auth != null)
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => NarrativePage(auth: widget.auth!),
+            ),
+          ),
+          icon: const Icon(Icons.auto_awesome),
+          label: const Text('История с GPT · Питерборский собор'),
+        ),
       const Wrap(
         spacing: 8,
         children: [

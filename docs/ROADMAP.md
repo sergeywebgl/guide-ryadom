@@ -2,7 +2,7 @@
 
 Use short Codex tasks, each independently reviewable; direct pushes to main are authorized in AGENTS.md. A milestone is only done after its acceptance criteria are demonstrated.
 
-Current evidence: M0 owner-reported real-device smoke test passed. M1 implementation and automated checks are recorded in [M1_VALIDATION.md](M1_VALIDATION.md); the owner confirmed M1.3 authentication and model discovery on one Android phone; completed inference and second-phone acceptance are pending. M2 has not started.
+Current evidence: M0 owner-reported real-device smoke test passed. M1 implementation and automated checks are recorded in [M1_VALIDATION.md](M1_VALIDATION.md); the owner confirmed M1.3 authentication and model discovery on one Android phone; the owner tentatively confirmed M1.7 works on 19 October 2026. Lifecycle and second-phone acceptance remain pending. M2.0 implementation and manual checklist are recorded in [M2_VALIDATION.md](M2_VALIDATION.md); M3 has not started.
 
 ## M0 — Executable UI and isolated domain (first Codex task)
 

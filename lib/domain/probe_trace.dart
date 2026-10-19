@@ -135,7 +135,7 @@ class ProbeTrace {
   }
 
   String get report => [
-    'Guide Ryadom M1.7 / diagnostic schema 1',
+    'Guide Ryadom M2.0 / diagnostic schema 1',
     'UTC $started',
     'POST https://api.openai.com/v1/responses',
     'OAuth bearer omitted; stream=true store=false input=user/text',

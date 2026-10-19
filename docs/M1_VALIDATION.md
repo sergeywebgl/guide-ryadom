@@ -2,6 +2,8 @@
 
 ## Status and feasibility
 
+19 October 2026: owner reports M1.7 “вроде работает” and authorizes moving on. Record this as tentative one-phone success, not confirmation of all acceptance checks. Second-phone independence, logout/revocation, restart persistence and refresh remain pending explicit device evidence. M2 work is now authorized separately.
+
 ### M1.7 completed response with streamed text (1.1.7+9)
 
 Build evidence: [successful run 39065529616](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39065529616), code `bea2a062f941eb83b29fc79048d6a97937eca1e2`. Formatting, analysis, 92 tests and Android debug build passed. Artifact: `guide-ryadom-m1-debug`. Corrected UI confirmation on the phone remains pending.

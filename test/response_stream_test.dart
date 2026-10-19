@@ -33,6 +33,37 @@ Stream<List<int>> chunks(String value) =>
     Stream.fromIterable(utf8.encode(value).map((b) => [b]));
 
 void main() {
+  test('narrative prompt uses the same public streamed request without extra fields', () async {
+    final trace = ProbeTrace();
+    final transport = OpenAiTransport(
+      MockClient((r) async {
+        final body = jsonDecode(r.body) as Map;
+        expect(body.keys.toSet(), {'model', 'input', 'store', 'stream'});
+        expect(body['input'], [
+          {'role': 'user', 'content': 'custom narrative evidence'},
+        ]);
+        expect(body['store'], false);
+        expect(body['stream'], true);
+        return http.Response(
+          frame(completed()),
+          200,
+          headers: {'content-type': 'text/event-stream; charset=utf-8'},
+        );
+      }),
+    );
+    expect(
+      await transport.probe(
+        'mock',
+        'model',
+        (_) {},
+        prompt: 'custom narrative evidence',
+        trace: trace,
+      ),
+      'Факт о соборе.',
+    );
+    expect(trace.report, isNot(contains('custom narrative evidence')));
+  });
+
   for (final variant in [
     'no_text',
     'wrong_id',
@@ -272,7 +303,7 @@ void main() {
         expect(failure.media, entry.value);
         expect(
           failure.diagnostic,
-          'M1.7 / response / response_format / HTTP 200 / media=${entry.value.name}',
+          'M2.0 / response / response_format / HTTP 200 / media=${entry.value.name}',
         );
         expect(failure.diagnostic, isNot(contains('TOKEN')));
         expect(cancelled, isTrue);

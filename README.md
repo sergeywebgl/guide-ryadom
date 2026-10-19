@@ -2,13 +2,9 @@
 
 A voice-first, location-aware AI walking-tour guide. **Personal open-source prototype** for two separate Android devices, each using its owner's ChatGPT Plus account, subject to account eligibility and current Sign in with ChatGPT restrictions.
 
-**Status:** M0 offline demo accepted after the owner's real-Android smoke test. M1 implements official ChatGPT OAuth and a separate streamed GPT connectivity test. **The owner confirmed M1.3 sign-in and model discovery on one Android phone; completed subscription inference remains pending**; M1 is not yet accepted as technically complete. See [M1 validation and phone checklist](docs/M1_VALIDATION.md).
-
-**M1.7 (1.1.7+9):** fixes the confirmed client rejection of valid completed inference with an empty final output list. Text received in deltas is retained after validated completion. The detailed diagnostic report remains available. The owner's M1.6 report confirms the server sent completed inference; corrected app UI acceptance on the phone remains pending.
+**Status:** M0 offline demo accepted; owner tentatively confirmed M1.7 on one phone and authorized M2 on 19 October 2026. M1 lifecycle/second-phone checks remain pending. M2.0 adds the first cathedral story with reviewed evidence, explicit requests and distinct follow-ups. See [M2 validation and phone checklist](docs/M2_VALIDATION.md).
 
 ## Run the app
-
-**Latest APK:** [M1.7 successful build 39065529616](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39065529616), artifact `guide-ryadom-m1-debug`. Formatting, analysis, 92 tests and Android build passed. Install `app-debug.apk`, run one test and confirm **Ответ завершён · response.completed**. Detailed diagnostics remain available if needed.
 
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 
@@ -29,7 +25,7 @@ flutter test
 flutter build apk --debug
 ```
 
-APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m1-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
+APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m2-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
 
 **M1 download:** open [successful M1 build 38898910026](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38898910026) (code `bd8cbe7`) and download `guide-ryadom-m1-debug`. Format, analysis, 51 tests and Android build passed. Unzip and install `app-debug.apk`. In Settings, tap **Подключить ChatGPT**, finish consent in the system browser, return to the app, then tap **Отправить тестовый запрос**. Only **Ответ завершён · response.completed** confirms the request completed. No API key is needed. Full instructions and update-signing caveat: [M1_VALIDATION.md](docs/M1_VALIDATION.md).
 
@@ -71,7 +67,7 @@ Walk around an unfamiliar city; the guide discovers relevant historical places, 
 
 ## First deliverable
 
-M0 implements the **offline demo** with the Peterborough Cathedral example and responsive Russian UI. M1 is the authorized Android OAuth proof of concept; its physical-device acceptance gate remains open. Do **not** claim subscription inference is working until the owner completes that gate. The original kickoff is historical M0 scope; it must not restart M0 or expand the current M1 task into M2.
+M0 implements the **offline demo** with the Peterborough Cathedral example and responsive Russian UI. M1 is the authorized Android OAuth proof of concept; its physical-device acceptance gate remains open. Do **not** claim subscription inference is working until the owner completes that gate. The original kickoff is historical M0 scope; the owner has separately authorized M2. Stop before M3.
 
 ## Technology proposal
 

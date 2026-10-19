@@ -1,4 +1,5 @@
 import '../../domain/probe_trace.dart';
+import '../../domain/narrative.dart';
 
 import 'dart:async';
 import 'dart:convert';
@@ -49,7 +50,7 @@ class _Session {
   );
 }
 
-class ChatGptAuthService implements AuthProvider {
+class ChatGptAuthService implements AuthProvider, NarrativeProviderV1 {
   ChatGptAuthService({
     required this.vault,
     required this.browser,
@@ -488,13 +489,27 @@ class ChatGptAuthService implements AuthProvider {
     String model,
     void Function(String) onPartial, {
     ProbeTrace? trace,
+  }) => generate(model, diagnosticPrompt, onPartial, trace: trace);
+
+  @override
+  Future<String> generate(
+    String model,
+    String prompt,
+    void Function(String) onPartial, {
+    ProbeTrace? trace,
   }) => _run((transport, epoch) async {
     if (!_models.any((m) => m.slug == model)) throw const AuthFailure('models');
     final token = await _access(transport, epoch);
     _stage = AuthStage.response;
-    final result = await transport.probe(token, model, (text) {
-      if (epoch == _epoch && !_disposed) onPartial(text);
-    }, trace: trace);
+    final result = await transport.probe(
+      token,
+      model,
+      (text) {
+        if (epoch == _epoch && !_disposed) onPartial(text);
+      },
+      trace: trace,
+      prompt: prompt,
+    );
     _check(epoch);
     return result;
   });
