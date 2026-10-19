@@ -6,6 +6,8 @@ A voice-first, location-aware AI walking-tour guide. **Personal open-source prot
 
 ## Run the app
 
+**Latest APK — M2.0 (1.2.0+10):** [successful build 39336901614](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39336901614), artifact `guide-ryadom-m2-debug`. Formatting, analysis, 103 tests and Android build passed. Open **Экскурсия → История с GPT · Питерборский собор**, load/select a model and tap **Начать рассказ**, then **Подробнее** or **Удиви меня**. Real-device quality acceptance is pending. Story history resets when this separate screen closes.
+
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 
 ```sh

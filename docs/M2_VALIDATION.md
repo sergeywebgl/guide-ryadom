@@ -34,6 +34,8 @@ Checking IDs and structure does **not** prove every sentence is entailed by the 
 
 ## Automated verification
 
+Local formatting, analysis and **103 tests** passed. [GitHub Actions run 39336901614](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39336901614), code `e7420294c762e46b3332275524a2885e49c15d7a`, also passed formatting, analysis, all 103 tests and Android debug build. Artifact: `guide-ryadom-m2-debug`, version 1.2.0+10. M2 device and narration-quality checks remain pending.
+
 Local formatting, Flutter analysis and tests are run; build evidence is recorded below after CI. Tests cover claim/source validation, unknown and duplicate IDs, malformed version/text/URLs, cancellation with late response, repeated taps, failure/retry, novel follow-up, account cleanup, UI/source actions and 320px/200% layout. Existing OAuth, SSE and offline tests remain. No live request or physical-device test was performed by the agent.
 
 ## Owner checklist
