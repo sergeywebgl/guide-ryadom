@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../domain/ports.dart';
+import '../domain/device_location.dart';
+import '../features/location_page.dart';
 import '../domain/tour.dart';
 import '../features/tour_controller.dart';
 import '../features/auth_controller.dart';
@@ -13,7 +15,13 @@ const _paper = Color(0xFFF7F3EB);
 const _bronze = Color(0xFF8A6034);
 
 class GuideApp extends StatelessWidget {
-  const GuideApp({super.key, required this.controller, this.auth});
+  const GuideApp({
+    super.key,
+    required this.controller,
+    this.auth,
+    this.location,
+  });
+  final DeviceLocation? location;
   final TourController controller;
   final AuthController? auth;
   @override
@@ -34,12 +42,13 @@ class GuideApp extends StatelessWidget {
         style: OutlinedButton.styleFrom(minimumSize: const Size(48, 52)),
       ),
     ),
-    home: _GuideHome(controller: controller, auth: auth),
+    home: _GuideHome(controller: controller, auth: auth, location: location),
   );
 }
 
 class _GuideHome extends StatefulWidget {
-  const _GuideHome({required this.controller, this.auth});
+  const _GuideHome({required this.controller, this.auth, this.location});
+  final DeviceLocation? location;
   final TourController controller;
   final AuthController? auth;
   @override
@@ -153,6 +162,16 @@ class _GuideHomeState extends State<_GuideHome> {
     }
 
     return [
+      if (widget.location != null)
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => LocationPage(provider: widget.location!),
+            ),
+          ),
+          icon: const Icon(Icons.near_me_outlined),
+          label: const Text('Места рядом'),
+        ),
       if (widget.auth != null)
         OutlinedButton.icon(
           onPressed: () => Navigator.of(context).push(

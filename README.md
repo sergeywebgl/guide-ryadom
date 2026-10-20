@@ -2,11 +2,13 @@
 
 A voice-first, location-aware AI walking-tour guide. **Personal open-source prototype** for two separate Android devices, each using its owner's ChatGPT Plus account, subject to account eligibility and current Sign in with ChatGPT restrictions.
 
-**Status:** M0 offline demo accepted; owner tentatively confirmed M1.7 on one phone and authorized M2 on 19 October 2026. M1 lifecycle/second-phone checks remain pending. M2.0 adds the first cathedral story with reviewed evidence, explicit requests and distinct follow-ups. See [M2 validation and phone checklist](docs/M2_VALIDATION.md).
+**Status:** Owner confirmed M2 works on their phone on 20 October 2026. M3.1 adds explicit foreground location measurement; device acceptance is pending. See [M3.1 checklist](docs/M3_VALIDATION.md). M1 second-phone/lifecycle checks remain separate.
 
 ## Run the app
 
-**Latest APK — M2.0 (1.2.0+10):** [successful build 39336901614](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39336901614), artifact `guide-ryadom-m2-debug`. Formatting, analysis, 103 tests and Android build passed. Open **Экскурсия → История с GPT · Питерборский собор**, load/select a model and tap **Начать рассказ**, then **Подробнее** or **Удиви меня**. Real-device quality acceptance is pending. Story history resets when this separate screen closes.
+**M3.1 (1.3.1+11):** foreground coordinates/accuracy, approximate permission, cancellation and clear failure states. Build artifact: `guide-ryadom-m31-debug`. Physical-device verification remains pending.
+
+**Latest APK — M2.0 (1.2.0+10):** [successful build 39336901614](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39336901614), artifact `guide-ryadom-m2-debug`. Formatting, analysis, 103 tests and Android build passed. Open **Экскурсия → История с GPT · Питерборский собор**, load/select a model and tap **Начать рассказ**, then **Подробнее** or **Удиви меня**. Owner reported successful operation on 20 October 2026. Story history resets when this separate screen closes.
 
 Use Flutter **3.47.7** (Dart **3.13.5**) and the Android SDK with Java 17. Install Android command-line/platform tools through Android Studio, accept SDK licences, and connect an Android phone with USB debugging or start an emulator.
 
@@ -27,7 +29,7 @@ flutter test
 flutter build apk --debug
 ```
 
-APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m2-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
+APK output: `build/app/outputs/flutter-apk/app-debug.apk`. GitHub Actions runs the same checks and publishes `guide-ryadom-m31-debug` when its build succeeds; check the run status before expecting an artifact. This is a debug build, not a store release.
 
 **M1 download:** open [successful M1 build 38898910026](https://github.com/sergeywebgl/guide-ryadom/actions/runs/38898910026) (code `bd8cbe7`) and download `guide-ryadom-m1-debug`. Format, analysis, 51 tests and Android build passed. Unzip and install `app-debug.apk`. In Settings, tap **Подключить ChatGPT**, finish consent in the system browser, return to the app, then tap **Отправить тестовый запрос**. Only **Ответ завершён · response.completed** confirms the request completed. No API key is needed. Full instructions and update-signing caveat: [M1_VALIDATION.md](docs/M1_VALIDATION.md).
 
@@ -45,7 +47,7 @@ The temporary package ID is `com.example.guide_ryadom`. For release, update `app
 
 ### Current limitations
 
-Audio, camera and live GPS/maps are not connected. The Listen and camera controls explain their unavailable state. No network requests or account are required by the demo. M1 uses INTERNET for explicit authentication/diagnostics; no location/camera permission is requested. Tour progress and text settings reset when the process restarts; OAuth credentials persist separately in Android-backed encrypted storage. Narratives are deliberately shorter than production word-count targets. Background/lock-screen playback is not implemented.
+M3.1 adds one-shot device coordinates through **Экскурсия → Места рядом → Определить местоположение**. Maps, nearby discovery, audio and camera are not connected. The Listen and camera controls explain their unavailable state. No network requests or account are required by the demo. Location permission is requested only after the measurement button is tapped; no background location or camera permission is requested. Coordinates are not persisted or sent by the app. Tour progress and text settings reset when the process restarts; OAuth credentials persist separately in Android-backed encrypted storage. Narratives are deliberately shorter than production word-count targets. Background/lock-screen playback is not implemented.
 
 Local validation on 16 October 2026: analysis clean and 9 tests passed, including 320px/200% text layout. Local APK build was attempted but blocked by **No Android SDK found**; this is not a successful device test. See [M0 validation](docs/M0_VALIDATION.md).
 

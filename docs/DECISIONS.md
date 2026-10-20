@@ -71,6 +71,8 @@ Owner confirmed consent and receipt of the loopback return page, then supplied a
 
 ## Open questions to resolve with tests
 
+M3.1 (20 October 2026): use pinned `geolocator` 14.1.2 behind a separate DeviceLocation port for user-triggered foreground snapshots. This avoids adding custom Android permission/provider lifecycle code. Reviewed [plugin documentation](https://pub.dev/packages/geolocator) and installed Android manifest: the plugin declares a bound location service, but this app does not enable foreground notifications or request background/foreground-service location permissions. Cancel the stream on completion, timeout, leaving the page or backgrounding. Approximate permission is valid; show measured accuracy and freshness. Native GPS reliability still requires phone testing. POI provider selection remains M3.2.
+
 - OAuth loopback on Android and behavior on both devices.
 - Best licensed POI/maps/routing provider with adequate UK historical coverage.
 - Russian TTS voice quality and lock-screen capabilities.

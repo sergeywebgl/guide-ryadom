@@ -1,4 +1,4 @@
-name: Flutter M2
+name: Flutter M3.1
 on:
   push:
     branches: [main]
@@ -27,5 +27,5 @@ jobs:
       - run: flutter build apk --debug
       - uses: actions/upload-artifact@v4
         with:
-          name: guide-ryadom-m2-debug
+          name: guide-ryadom-m31-debug
           path: build/app/outputs/flutter-apk/app-debug.apk

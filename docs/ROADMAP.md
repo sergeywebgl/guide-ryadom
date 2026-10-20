@@ -34,6 +34,8 @@ Current evidence: M0 owner-reported real-device smoke test passed. M1 implementa
 
 ## M3 — Location and discovery
 
+Split into M3.1 (explicit foreground device measurement) and M3.2 (nearby POI discovery). M3.1 implements coordinates/accuracy and permission/error/cancellation states; physical-device acceptance remains pending. M3.2 has not started. See [M3 validation](M3_VALIDATION.md).
+
 - Foreground GPS permission/accuracy; nearby results via pluggable adapter.
 - Geographic deduplication; explicit error/offline behavior; local cache and source attribution.
 - No geolocation without permission; never misrepresent mock position.

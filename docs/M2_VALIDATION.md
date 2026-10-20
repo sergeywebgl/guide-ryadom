@@ -1,6 +1,6 @@
 # M2.0 — first evidence-backed story
 
-Version 1.2.0+10. Authorized by the owner on 19 October 2026 after tentative M1 success. This is the first M2 implementation, not physical-device acceptance.
+Version 1.2.0+10. Authorized by the owner on 19 October 2026 after tentative M1 success. On 20 October the owner reported that everything works and authorized the next step. This confirms the owner's M2 phone smoke test, not every lifecycle or second-account scenario below.
 
 ## Implemented
 
