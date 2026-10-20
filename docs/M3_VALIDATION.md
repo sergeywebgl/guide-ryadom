@@ -16,7 +16,7 @@ Version 1.3.1+11, 20 October 2026. This is only the location part of M3, not nea
 
 Tests cover freshness/invalid fixes, permission outcomes, approximate fixes, duplicate taps, cancellation with late permission, timeout, stream failure/early close, background cancellation and 320px layout with 200% text. Existing offline and authentication/story regressions remain in the suite.
 
-Final check and build results are recorded after CI completes. No physical-device M3 tests have been performed by the agent.
+Formatting and analysis passed; all 113 tests passed locally and in CI. Android debug APK build succeeded in [run 39387304639](https://github.com/sergeywebgl/guide-ryadom/actions/runs/39387304639), code commit a1e247a, artifact `guide-ryadom-m31-debug`. Local Android SDK is unavailable, so the APK was built in CI. No physical-device M3 tests have been performed by the agent.
 
 ## Owner checklist — pending
 
